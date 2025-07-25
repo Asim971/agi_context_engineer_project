@@ -1,0 +1,74 @@
+@startuml
+skinparam backgroundColor #f9f9f9
+skinparam defaultFontName Arial
+skinparam defaultFontSize 18
+skinparam defaultFontWeight bold
+
+skinparam arrow {
+    Color #FF0000
+    Thickness 4
+}
+
+skinparam activity {
+    BackgroundColor #FFFFFF
+    BorderColor #FF6347
+    FontColor #000000
+    FontSize 18
+    FontWeight bold
+    Shadowing true
+    RoundCorner 15
+}
+
+skinparam swimlane {
+    BackgroundColor #EFEFEF
+    FontColor Black
+    FontWeight bold
+    BorderColor #FF6347
+}
+
+title <size:28><color:#FF0000>User Journey - User Order</color></size>
+
+|WhatsApp Notification|
+:Potential Site Created;
+
+|S R|
+start
+:Login to Google;
+:Open Form;
+
+
+|User Order|
+:Provide Project ID;
+:Provide Sales Volume;
+:Privide Project Details;
+if (Delivery Method = "Factory DN"?) then (Yes)
+  :Send Order to CRM for Approval;
+else (No)
+  :Notify CRO for Visit;
+  :CRO Conducts Conversion Visit;
+  :Send Order to CRM for Approval;
+
+endif
+:Upload Memo;
+:Click Checkbox;
+:Submit;
+
+|WhatsApp Notification|
+:B DO;
+:C RO;
+:S R;
+
+|C RM|
+:View Data;
+:Verify;
+:Approve or Reject;
+
+|WhatsApp Notification|
+:SR,B DO,CRO;
+
+|Data Sheet|
+:View Individual Data;
+stop
+
+@enduml
+

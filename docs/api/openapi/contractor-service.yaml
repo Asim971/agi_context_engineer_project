@@ -1,0 +1,617 @@
+openapi: 3.0.3
+info:
+  title: Contractor Registration Service API
+  description: API for managing contractor registration, verification, and profile management in the Anwar Sales Management System
+  version: 1.0.0
+  contact:
+    name: Anwar Sales Management System
+    email: support@anwarsales.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://script.google.com/macros/s/{SCRIPT_ID}/exec/api/v1/contractors
+    description: Production server
+  - url: https://script.google.com/macros/s/{DEV_SCRIPT_ID}/exec/api/v1/contractors
+    description: Development server
+
+security:
+  - GoogleOAuth2: []
+  - ApiKeyAuth: []
+
+paths:
+  /register:
+    post:
+      summary: Register new contractor
+      description: Register a new contractor with personal, contact, and business information
+      operationId: registerContractor
+      tags:
+        - Contractor Registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractorRegistrationRequest'
+      responses:
+        '201':
+          description: Contractor registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractorResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Contractor already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{contractorId}:
+    get:
+      summary: Get contractor by ID
+      description: Retrieve contractor information by contractor ID
+      operationId: getContractor
+      tags:
+        - Contractor Management
+      parameters:
+        - name: contractorId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique contractor identifier
+      responses:
+        '200':
+          description: Contractor information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractorResponse'
+        '404':
+          description: Contractor not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update contractor information
+      description: Update contractor profile information
+      operationId: updateContractor
+      tags:
+        - Contractor Management
+      parameters:
+        - name: contractorId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractorUpdateRequest'
+      responses:
+        '200':
+          description: Contractor updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractorResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Contractor not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /search:
+    get:
+      summary: Search contractors
+      description: Search contractors with various filters
+      operationId: searchContractors
+      tags:
+        - Contractor Management
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: Search by contractor name
+        - name: cnic
+          in: query
+          schema:
+            type: string
+          description: Search by CNIC number
+        - name: phone
+          in: query
+          schema:
+            type: string
+          description: Search by phone number
+        - name: district
+          in: query
+          schema:
+            type: string
+          description: Filter by district
+        - name: tehsil
+          in: query
+          schema:
+            type: string
+          description: Filter by tehsil
+        - name: verificationStatus
+          in: query
+          schema:
+            type: string
+            enum: [pending, verified, rejected]
+          description: Filter by verification status
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of results per page
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractorSearchResponse'
+
+  /{contractorId}/verify:
+    post:
+      summary: Verify contractor
+      description: Verify contractor documents and information
+      operationId: verifyContractor
+      tags:
+        - Contractor Verification
+      parameters:
+        - name: contractorId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationRequest'
+      responses:
+        '200':
+          description: Contractor verification completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResponse'
+        '400':
+          description: Invalid verification data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Contractor not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    GoogleOAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.google.com/oauth2/auth
+          tokenUrl: https://oauth2.googleapis.com/token
+          scopes:
+            read: Read access to contractor data
+            write: Write access to contractor data
+            verify: Verify contractor information
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    ContractorRegistrationRequest:
+      type: object
+      required:
+        - personalInfo
+        - contactInfo
+        - locationInfo
+        - workProfile
+      properties:
+        personalInfo:
+          $ref: '#/components/schemas/PersonalInfo'
+        contactInfo:
+          $ref: '#/components/schemas/ContactInfo'
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        locationInfo:
+          $ref: '#/components/schemas/LocationInfo'
+        workProfile:
+          $ref: '#/components/schemas/WorkProfile'
+
+    ContractorUpdateRequest:
+      type: object
+      properties:
+        personalInfo:
+          $ref: '#/components/schemas/PersonalInfo'
+        contactInfo:
+          $ref: '#/components/schemas/ContactInfo'
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        locationInfo:
+          $ref: '#/components/schemas/LocationInfo'
+        workProfile:
+          $ref: '#/components/schemas/WorkProfile'
+
+    ContractorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Contractor'
+        message:
+          type: string
+
+    ContractorSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            contractors:
+              type: array
+              items:
+                $ref: '#/components/schemas/Contractor'
+            pagination:
+              $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+
+    Contractor:
+      type: object
+      properties:
+        id:
+          type: string
+        registrationId:
+          type: string
+        personalInfo:
+          $ref: '#/components/schemas/PersonalInfo'
+        contactInfo:
+          $ref: '#/components/schemas/ContactInfo'
+        businessInfo:
+          $ref: '#/components/schemas/BusinessInfo'
+        locationInfo:
+          $ref: '#/components/schemas/LocationInfo'
+        workProfile:
+          $ref: '#/components/schemas/WorkProfile'
+        verificationStatus:
+          $ref: '#/components/schemas/VerificationStatus'
+        workflowStatus:
+          $ref: '#/components/schemas/WorkflowStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PersonalInfo:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - cnic
+        - dateOfBirth
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        cnic:
+          type: string
+          pattern: '^[0-9]{5}-[0-9]{7}-[0-9]$'
+        dateOfBirth:
+          type: string
+          format: date
+        fatherName:
+          type: string
+          maxLength: 100
+        gender:
+          type: string
+          enum: [male, female, other]
+
+    ContactInfo:
+      type: object
+      required:
+        - email
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: '^\+92-[0-9]{3}-[0-9]{7}$'
+        alternatePhone:
+          type: string
+          pattern: '^\+92-[0-9]{3}-[0-9]{7}$'
+        whatsappNumber:
+          type: string
+          pattern: '^\+92-[0-9]{3}-[0-9]{7}$'
+
+    BusinessInfo:
+      type: object
+      properties:
+        businessName:
+          type: string
+          maxLength: 100
+        businessType:
+          type: string
+          enum: [individual, partnership, company]
+        registrationNumber:
+          type: string
+          maxLength: 50
+        taxNumber:
+          type: string
+          maxLength: 50
+        bankAccountDetails:
+          $ref: '#/components/schemas/BankAccountDetails'
+
+    LocationInfo:
+      type: object
+      required:
+        - province
+        - district
+        - tehsil
+        - address
+      properties:
+        province:
+          type: string
+        district:
+          type: string
+        tehsil:
+          type: string
+        union:
+          type: string
+        village:
+          type: string
+        address:
+          type: string
+          maxLength: 500
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+
+    WorkProfile:
+      type: object
+      required:
+        - experienceYears
+        - specializations
+        - workingRadius
+      properties:
+        experienceYears:
+          type: integer
+          minimum: 0
+          maximum: 50
+        specializations:
+          type: array
+          items:
+            type: string
+            enum: [solar_installation, electrical_work, plumbing, construction, maintenance]
+        workingRadius:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Working radius in kilometers
+        certifications:
+          type: array
+          items:
+            type: string
+        tools:
+          type: array
+          items:
+            type: string
+        availability:
+          type: string
+          enum: [full_time, part_time, weekends_only]
+        ratePerDay:
+          type: number
+          minimum: 0
+
+    BankAccountDetails:
+      type: object
+      properties:
+        accountTitle:
+          type: string
+        accountNumber:
+          type: string
+        bankName:
+          type: string
+        branchCode:
+          type: string
+        iban:
+          type: string
+
+    Coordinates:
+      type: object
+      properties:
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+
+    VerificationStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, in_progress, verified, rejected]
+        verifiedBy:
+          type: string
+        verificationDate:
+          type: string
+          format: date-time
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentVerification'
+        notes:
+          type: string
+
+    DocumentVerification:
+      type: object
+      properties:
+        documentType:
+          type: string
+          enum: [cnic, license, certificate, bank_statement]
+        status:
+          type: string
+          enum: [pending, verified, rejected]
+        verifiedBy:
+          type: string
+        verificationDate:
+          type: string
+          format: date-time
+        notes:
+          type: string
+
+    WorkflowStatus:
+      type: object
+      properties:
+        currentStep:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, paused, cancelled]
+        estimatedCompletion:
+          type: string
+          format: date-time
+        actualCompletion:
+          type: string
+          format: date-time
+
+    VerificationRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [approve, reject, request_more_info]
+        notes:
+          type: string
+        documentVerifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentVerification'
+        verifiedBy:
+          type: string
+
+    VerificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            verificationStatus:
+              $ref: '#/components/schemas/VerificationStatus'
+            workflowStatus:
+              $ref: '#/components/schemas/WorkflowStatus'
+        message:
+          type: string
+
+    PaginationInfo:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+        totalPages:
+          type: integer
+        totalItems:
+          type: integer
+        itemsPerPage:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+            timestamp:
+              type: string
+              format: date-time
+
+tags:
+  - name: Contractor Registration
+    description: Operations related to contractor registration
+  - name: Contractor Management
+    description: Operations for managing contractor profiles
+  - name: Contractor Verification
+    description: Operations for verifying contractor information and documents

@@ -1,0 +1,558 @@
+{
+  "project": {
+    "name": "Anwar Sales Management System",
+    "version": "1.0.0",
+    "description": "Comprehensive sales management system with four integrated registration modules",
+    "framework": "Agentic Vibe Coding Framework",
+    "analysis_date": "2024-12-19",
+    "analyst_agent": "Requirements Analysis Agent"
+  },
+  "systems": {
+    "contractor_registration": {
+      "id": "CR",
+      "name": "Contractor Registration System",
+      "description": "Streamlined contractor registration and verification system",
+      "primary_stakeholder": "CRO",
+      "objectives": [
+        "Streamline contractor registration process",
+        "Improve operational efficiency",
+        "Ensure data accuracy and integrity",
+        "Facilitate business scalability"
+      ],
+      "user_journey": [
+        "Contractor submits details via Google Form",
+        "System sends WhatsApp notification to CRO",
+        "Data stored in backend database and Google Sheets",
+        "CRM team verifies contractor information",
+        "Post-verification cleanup from Google Sheets"
+      ]
+    },
+    "engineer_registration": {
+      "id": "ER",
+      "name": "Engineer Registration System",
+      "description": "Engineer registration and verification with dual notification system",
+      "primary_stakeholder": "BDO",
+      "secondary_stakeholder": "CRO",
+      "objectives": [
+        "Streamline engineer registration and verification",
+        "Ensure regulatory compliance",
+        "Facilitate efficient project assignments",
+        "Enable collaborative workflow between BDO and CRO"
+      ],
+      "user_journey": [
+        "BDO submits engineer details via Google Form",
+        "System sends WhatsApp notifications to both CRO and BDO",
+        "Data stored in backend database and Google Sheets",
+        "CRM team verifies engineer information",
+        "Post-verification cleanup from Google Sheets"
+      ]
+    },
+    "retailer_registration": {
+      "id": "RR",
+      "name": "Retailer Registration System",
+      "description": "Standardized retailer onboarding with triple notification system",
+      "primary_stakeholder": "SR",
+      "objectives": [
+        "Standardize retailer onboarding process",
+        "Implement triple notification system",
+        "Ensure data integrity and accuracy",
+        "Support business growth and scalability"
+      ],
+      "user_journey": [
+        "SR submits retailer details via Google Form",
+        "System sends notifications to three stakeholders",
+        "Data stored in backend database and Google Sheets",
+        "CRM team verifies retailer information",
+        "Individual data sheet generated for retailer",
+        "Post-verification cleanup from Google Sheets"
+      ]
+    },
+    "potential_site_registration": {
+      "id": "PS",
+      "name": "Potential Site Registration System",
+      "description": "Collaborative potential site registration and tracking",
+      "primary_stakeholders": ["BDO", "CRO"],
+      "objectives": [
+        "Standardize potential site registration",
+        "Enable collaborative workflow between BDO and CRO",
+        "Maintain data integrity",
+        "Support business expansion"
+      ],
+      "user_journey": [
+        "BDO or CRO submits site details via Google Form",
+        "System sends notifications to relevant stakeholders",
+        "Data stored in backend database and Google Sheets",
+        "CRM team verifies site information",
+        "Post-verification cleanup from Google Sheets"
+      ]
+    }
+  },
+  "stakeholders": {
+    "CRO": {
+      "name": "Contractor Registration Officer",
+      "role": "Primary user for contractor registration",
+      "responsibilities": [
+        "Review contractor applications",
+        "Verify contractor information",
+        "Approve or reject registrations"
+      ],
+      "systems_involved": ["CR", "ER", "PS"]
+    },
+    "BDO": {
+      "name": "Business Development Officer",
+      "role": "Primary user for engineer and site registration",
+      "responsibilities": [
+        "Register qualified engineers",
+        "Identify potential sites",
+        "Coordinate with CRO for approvals"
+      ],
+      "systems_involved": ["ER", "PS"]
+    },
+    "SR": {
+      "name": "Sales Representative",
+      "role": "Primary user for retailer registration",
+      "responsibilities": [
+        "Onboard new retailers",
+        "Maintain retailer relationships",
+        "Ensure accurate retailer data"
+      ],
+      "systems_involved": ["RR"]
+    },
+    "CRM_Team": {
+      "name": "CRM Team",
+      "role": "Verification and data management",
+      "responsibilities": [
+        "Verify all registrations",
+        "Maintain data quality",
+        "Process approvals"
+      ],
+      "systems_involved": ["CR", "ER", "RR", "PS"]
+    }
+  },
+  "functional_requirements": {
+    "core_functions": {
+      "FR-001": {
+        "title": "Form Management",
+        "description": "Manage Google Forms for all registration types",
+        "priority": "High",
+        "acceptance_criteria": [
+          "Forms must capture all required data fields",
+          "Forms must be accessible via web browsers",
+          "Forms must support file uploads where required",
+          "Forms must validate data before submission"
+        ]
+      },
+      "FR-002": {
+        "title": "Notification System",
+        "description": "WhatsApp-based notification system",
+        "priority": "High",
+        "acceptance_criteria": [
+          "Real-time notifications upon form submission",
+          "Support for multiple recipients per system",
+          "Message templates for different notification types",
+          "Delivery confirmation tracking"
+        ]
+      },
+      "FR-003": {
+        "title": "Data Storage",
+        "description": "Dual storage system (Backend DB + Google Sheets)",
+        "priority": "High",
+        "acceptance_criteria": [
+          "Automatic data synchronization",
+          "Data integrity validation",
+          "Backup and recovery mechanisms",
+          "Access control and permissions"
+        ]
+      },
+      "FR-004": {
+        "title": "CRM Integration",
+        "description": "Integration with CRM verification workflow",
+        "priority": "High",
+        "acceptance_criteria": [
+          "Seamless data transfer to CRM",
+          "Status tracking and updates",
+          "Verification workflow automation",
+          "Audit trail maintenance"
+        ]
+      },
+      "FR-005": {
+        "title": "Data Cleanup",
+        "description": "Post-verification data cleanup",
+        "priority": "Medium",
+        "acceptance_criteria": [
+          "Automated cleanup triggers",
+          "Data archival before cleanup",
+          "Selective cleanup based on verification status",
+          "Cleanup confirmation and logging"
+        ]
+      }
+    },
+    "system_specific": {
+      "contractor_registration": {
+        "FR-CR-001": {
+          "title": "Contractor Profile Management",
+          "description": "Comprehensive contractor information management",
+          "priority": "High"
+        },
+        "FR-CR-002": {
+          "title": "Document Upload and Validation",
+          "description": "Support for contractor document uploads",
+          "priority": "High"
+        },
+        "FR-CR-003": {
+          "title": "Registration Status Tracking",
+          "description": "Track contractor registration status",
+          "priority": "Medium"
+        },
+        "FR-CR-004": {
+          "title": "CRO Notification Management",
+          "description": "Manage notifications to CRO",
+          "priority": "High"
+        }
+      },
+      "engineer_registration": {
+        "FR-ER-001": {
+          "title": "Engineer Profile Management",
+          "description": "Comprehensive engineer information management",
+          "priority": "High"
+        },
+        "FR-ER-002": {
+          "title": "Qualification Verification",
+          "description": "Verify engineer qualifications and certifications",
+          "priority": "High"
+        },
+        "FR-ER-003": {
+          "title": "Dual Notification System",
+          "description": "Notify both BDO and CRO",
+          "priority": "High"
+        },
+        "FR-ER-004": {
+          "title": "Compliance Tracking",
+          "description": "Track regulatory compliance",
+          "priority": "Medium"
+        }
+      },
+      "retailer_registration": {
+        "FR-RR-001": {
+          "title": "Retailer Profile Management",
+          "description": "Comprehensive retailer information management",
+          "priority": "High"
+        },
+        "FR-RR-002": {
+          "title": "Triple Notification System",
+          "description": "Notify three different stakeholders",
+          "priority": "High"
+        },
+        "FR-RR-003": {
+          "title": "Individual Data Sheet Generation",
+          "description": "Generate individual data sheets for retailers",
+          "priority": "Medium"
+        },
+        "FR-RR-004": {
+          "title": "SR Workflow Management",
+          "description": "Manage SR-specific workflows",
+          "priority": "Medium"
+        }
+      },
+      "potential_site_registration": {
+        "FR-PS-001": {
+          "title": "Site Information Management",
+          "description": "Comprehensive site information management",
+          "priority": "High"
+        },
+        "FR-PS-002": {
+          "title": "Collaborative Submission Workflow",
+          "description": "Support BDO and CRO collaboration",
+          "priority": "High"
+        },
+        "FR-PS-003": {
+          "title": "Location Data Validation",
+          "description": "Validate site location information",
+          "priority": "Medium"
+        },
+        "FR-PS-004": {
+          "title": "Site Status Tracking",
+          "description": "Track potential site status",
+          "priority": "Medium"
+        }
+      }
+    }
+  },
+  "technical_requirements": {
+    "technology_stack": {
+      "frontend": {
+        "primary": "Google Forms",
+        "supporting": ["HTML5", "CSS3", "JavaScript"],
+        "frameworks": ["Google Apps Script"]
+      },
+      "backend": {
+        "primary": "Backend Database (TBD)",
+        "secondary": "Google Sheets",
+        "automation": "Google Apps Script",
+        "apis": "RESTful APIs"
+      },
+      "integrations": {
+        "communication": "WhatsApp Business API",
+        "authentication": "Google OAuth",
+        "storage": "Google Drive API",
+        "crm": "CRM APIs"
+      }
+    },
+    "infrastructure": {
+      "TR-001": {
+        "title": "Scalability",
+        "requirements": [
+          "Support for 1000+ concurrent users",
+          "Horizontal scaling capabilities",
+          "Load balancing implementation",
+          "Performance monitoring"
+        ]
+      },
+      "TR-002": {
+        "title": "Security",
+        "requirements": [
+          "Data encryption in transit and at rest",
+          "OAuth-based authentication",
+          "Role-based access control",
+          "Audit logging and monitoring"
+        ]
+      },
+      "TR-003": {
+        "title": "Integration",
+        "requirements": [
+          "WhatsApp Business API integration",
+          "Google Workspace integration",
+          "CRM system integration",
+          "Webhook support for real-time updates"
+        ]
+      },
+      "TR-004": {
+        "title": "Performance",
+        "requirements": [
+          "Form submission response time < 3 seconds",
+          "Notification delivery time < 30 seconds",
+          "Data synchronization time < 5 minutes",
+          "99.9% system availability"
+        ]
+      }
+    },
+    "data_models": {
+      "contractor": {
+        "fields": ["personal_info", "documents", "verification_status", "registration_date"],
+        "relationships": ["projects", "verifications"]
+      },
+      "engineer": {
+        "fields": ["qualifications", "certifications", "project_history", "compliance_status"],
+        "relationships": ["projects", "qualifications", "assignments"]
+      },
+      "retailer": {
+        "fields": ["business_info", "location", "product_categories", "verification_status"],
+        "relationships": ["sales", "products", "territories"]
+      },
+      "site": {
+        "fields": ["location", "specifications", "potential_assessment", "status"],
+        "relationships": ["projects", "assessments", "assignments"]
+      }
+    }
+  },
+  "non_functional_requirements": {
+    "performance": {
+      "response_time": "< 3 seconds for form submissions",
+      "throughput": "100 concurrent form submissions",
+      "scalability": "Handle 10x current load",
+      "availability": "99.9% uptime"
+    },
+    "security": {
+      "authentication": "Google OAuth integration",
+      "authorization": "Role-based access control",
+      "data_protection": "Encryption for sensitive data",
+      "audit_trail": "Comprehensive logging"
+    },
+    "usability": {
+      "user_interface": "Intuitive and responsive design",
+      "accessibility": "WCAG 2.1 AA compliance",
+      "mobile_support": "Responsive design",
+      "internationalization": "Multi-language support"
+    },
+    "reliability": {
+      "error_handling": "Graceful error handling and recovery",
+      "data_backup": "Automated daily backups",
+      "disaster_recovery": "RTO < 4 hours, RPO < 1 hour",
+      "monitoring": "Real-time system health monitoring"
+    }
+  },
+  "user_stories": {
+    "contractor_registration": [
+      {
+        "id": "US-CR-001",
+        "title": "Contractor Self-Registration",
+        "as_a": "contractor",
+        "i_want_to": "register myself through an online form",
+        "so_that": "I can be considered for projects",
+        "acceptance_criteria": [
+          "Form is accessible via web browser",
+          "All required fields are clearly marked",
+          "File upload functionality for documents",
+          "Confirmation message upon successful submission"
+        ]
+      },
+      {
+        "id": "US-CR-002",
+        "title": "CRO Notification",
+        "as_a": "CRO",
+        "i_want_to": "receive immediate WhatsApp notifications when contractors register",
+        "so_that": "I can quickly review and process applications",
+        "acceptance_criteria": [
+          "Notification received within 30 seconds of submission",
+          "Notification includes contractor basic information",
+          "Link to full application details provided",
+          "Notification delivery confirmation"
+        ]
+      }
+    ],
+    "engineer_registration": [
+      {
+        "id": "US-ER-001",
+        "title": "Engineer Registration by BDO",
+        "as_a": "BDO",
+        "i_want_to": "register engineers through a dedicated form",
+        "so_that": "qualified engineers are available for projects",
+        "acceptance_criteria": [
+          "Form includes all engineer qualification fields",
+          "Document upload for certifications",
+          "Validation of required fields",
+          "Submission confirmation"
+        ]
+      },
+      {
+        "id": "US-ER-002",
+        "title": "Dual Notification System",
+        "as_a": "system user",
+        "i_want": "both BDO and CRO to be notified of engineer registrations",
+        "so_that": "proper coordination is maintained",
+        "acceptance_criteria": [
+          "Both BDO and CRO receive notifications",
+          "Notifications sent simultaneously",
+          "Different message templates for different roles",
+          "Delivery confirmation for both recipients"
+        ]
+      }
+    ],
+    "retailer_registration": [
+      {
+        "id": "US-RR-001",
+        "title": "Retailer Registration by SR",
+        "as_an": "SR",
+        "i_want_to": "register retailers through a standardized form",
+        "so_that": "new retail partners can be onboarded efficiently",
+        "acceptance_criteria": [
+          "Comprehensive retailer information capture",
+          "Business document upload capability",
+          "Location and contact validation",
+          "Submission confirmation"
+        ]
+      },
+      {
+        "id": "US-RR-002",
+        "title": "Triple Notification System",
+        "as_a": "system administrator",
+        "i_want": "three different stakeholders to be notified of retailer registrations",
+        "so_that": "proper coordination and follow-up is ensured",
+        "acceptance_criteria": [
+          "Three distinct notification recipients",
+          "Role-specific message content",
+          "Simultaneous notification delivery",
+          "Delivery confirmation tracking"
+        ]
+      }
+    ],
+    "potential_site_registration": [
+      {
+        "id": "US-PS-001",
+        "title": "Collaborative Site Registration",
+        "as_a": "BDO or CRO",
+        "i_want_to": "register potential sites through a shared form",
+        "so_that": "site opportunities are captured and tracked",
+        "acceptance_criteria": [
+          "Form accessible to both BDO and CRO roles",
+          "Comprehensive site information capture",
+          "Location mapping integration",
+          "Submission tracking by user role"
+        ]
+      }
+    ]
+  },
+  "integration_points": {
+    "google_workspace": {
+      "components": ["Google Forms", "Google Sheets", "Google Drive", "Google Apps Script"],
+      "purpose": "Primary platform for data collection and automation"
+    },
+    "whatsapp_business_api": {
+      "components": ["Message Templates", "Webhook Configuration", "Status Tracking"],
+      "purpose": "Real-time notification delivery"
+    },
+    "crm_system": {
+      "components": ["Data Synchronization", "Workflow Triggers", "Status Updates"],
+      "purpose": "Verification and business process management"
+    }
+  },
+  "success_criteria": {
+    "functional": [
+      "All four registration systems operational",
+      "Real-time notification delivery",
+      "Successful CRM integration",
+      "Automated data cleanup functionality"
+    ],
+    "performance": [
+      "Form submission response time < 3 seconds",
+      "Notification delivery time < 30 seconds",
+      "99.9% system availability",
+      "Zero data loss incidents"
+    ],
+    "business": [
+      "50% reduction in registration processing time",
+      "90% user satisfaction rating",
+      "100% data accuracy in CRM integration",
+      "Zero security incidents"
+    ]
+  },
+  "risks_and_mitigation": {
+    "technical_risks": {
+      "api_rate_limiting": {
+        "description": "WhatsApp API usage limits",
+        "mitigation": "Implement rate limiting and queue management"
+      },
+      "data_synchronization": {
+        "description": "Potential data inconsistency",
+        "mitigation": "Implement data validation and reconciliation processes"
+      },
+      "system_integration": {
+        "description": "Complex integration challenges",
+        "mitigation": "Phased integration approach with comprehensive testing"
+      }
+    },
+    "business_risks": {
+      "user_adoption": {
+        "description": "Resistance to new system",
+        "mitigation": "Comprehensive training and change management"
+      },
+      "compliance_issues": {
+        "description": "Regulatory compliance failures",
+        "mitigation": "Regular compliance audits and updates"
+      }
+    }
+  },
+  "next_steps": [
+    "Stakeholder review and approval of requirements",
+    "Architecture design phase initiation",
+    "Technical specification development",
+    "Development team resource allocation",
+    "Project timeline and milestone definition"
+  ],
+  "framework_compliance": {
+    "requirements_analysis_agent": "Completed comprehensive requirements analysis",
+    "agent_coordination_framework": "Followed structured coordination protocols",
+    "agentic_vibe_coding_workflow": "Aligned with workflow phase 1 requirements",
+    "executive_summary_framework": "Incorporated framework standards and metrics"
+  }
+}

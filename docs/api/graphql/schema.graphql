@@ -1,0 +1,1310 @@
+# Anwar Sales Management System - GraphQL Schema
+# Version: 1.0.0
+# Description: Complete GraphQL schema for the Anwar Sales Management System
+
+scalar DateTime
+scalar JSON
+scalar Upload
+
+# ============================================================================
+# ENUMS
+# ============================================================================
+
+enum EntityType {
+  CONTRACTOR
+  ENGINEER
+  RETAILER
+  SITE
+  USER
+}
+
+enum WorkflowStatusEnum {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
+enum VerificationStatusEnum {
+  PENDING
+  IN_PROGRESS
+  VERIFIED
+  REJECTED
+}
+
+enum ApprovalStatusEnum {
+  PENDING
+  APPROVED
+  REJECTED
+  UNDER_REVIEW
+}
+
+enum GenderEnum {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum BusinessTypeEnum {
+  INDIVIDUAL
+  PARTNERSHIP
+  COMPANY
+}
+
+enum SpecializationEnum {
+  SOLAR_INSTALLATION
+  ELECTRICAL_WORK
+  PLUMBING
+  CONSTRUCTION
+  MAINTENANCE
+}
+
+enum AvailabilityEnum {
+  FULL_TIME
+  PART_TIME
+  WEEKENDS_ONLY
+}
+
+enum DocumentTypeEnum {
+  CNIC
+  LICENSE
+  CERTIFICATE
+  BANK_STATEMENT
+  ASSESSMENT
+  PRESCRIPTION
+  CONTRACT
+}
+
+enum NotificationChannelEnum {
+  EMAIL
+  WHATSAPP
+  SMS
+  IN_APP
+}
+
+enum NotificationPriorityEnum {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SiteTypeEnum {
+  RESIDENTIAL
+  COMMERCIAL
+  INDUSTRIAL
+  AGRICULTURAL
+}
+
+enum SystemTypeEnum {
+  ON_GRID
+  OFF_GRID
+  HYBRID
+}
+
+# ============================================================================
+# CORE TYPES
+# ============================================================================
+
+type PersonalInfo {
+  firstName: String!
+  lastName: String!
+  cnic: String!
+  dateOfBirth: DateTime!
+  fatherName: String
+  gender: GenderEnum
+}
+
+type ContactInfo {
+  email: String!
+  phone: String!
+  alternatePhone: String
+  whatsappNumber: String
+}
+
+type LocationInfo {
+  province: String!
+  district: String!
+  tehsil: String!
+  union: String
+  village: String
+  address: String!
+  coordinates: Coordinates
+}
+
+type Coordinates {
+  latitude: Float!
+  longitude: Float!
+}
+
+type BusinessInfo {
+  businessName: String
+  businessType: BusinessTypeEnum
+  registrationNumber: String
+  taxNumber: String
+  bankAccountDetails: BankAccountDetails
+}
+
+type BankAccountDetails {
+  accountTitle: String!
+  accountNumber: String!
+  bankName: String!
+  branchCode: String
+  iban: String
+}
+
+type WorkProfile {
+  experienceYears: Int!
+  specializations: [SpecializationEnum!]!
+  workingRadius: Int!
+  certifications: [String!]
+  tools: [String!]
+  availability: AvailabilityEnum!
+  ratePerDay: Float
+}
+
+type TechnicalProfile {
+  engineeringDiscipline: String!
+  licenseNumber: String!
+  experienceYears: Int!
+  specializations: [String!]!
+  certifications: [String!]!
+  workingRadius: Int!
+  availability: AvailabilityEnum!
+  ratePerDay: Float
+}
+
+type RetailerBusinessInfo {
+  businessName: String!
+  businessType: BusinessTypeEnum!
+  registrationNumber: String
+  taxNumber: String
+  establishedYear: Int
+  employeeCount: Int
+  annualRevenue: Float
+  bankAccountDetails: BankAccountDetails
+}
+
+type SalesInfo {
+  previousSolarExperience: Boolean!
+  targetMarket: [String!]!
+  salesChannels: [String!]!
+  expectedMonthlySales: Int
+  investmentCapacity: Float
+}
+
+type VerificationStatus {
+  status: VerificationStatusEnum!
+  verifiedBy: String
+  verificationDate: DateTime
+  documents: [DocumentVerification!]!
+  notes: String
+}
+
+type DocumentVerification {
+  documentType: DocumentTypeEnum!
+  status: VerificationStatusEnum!
+  verifiedBy: String
+  verificationDate: DateTime
+  notes: String
+}
+
+type ApprovalStatus {
+  status: ApprovalStatusEnum!
+  approvedBy: String
+  approvalDate: DateTime
+  notes: String
+}
+
+# ============================================================================
+# MAIN ENTITY TYPES
+# ============================================================================
+
+type Contractor {
+  id: ID!
+  registrationId: String!
+  personalInfo: PersonalInfo!
+  contactInfo: ContactInfo!
+  businessInfo: BusinessInfo
+  locationInfo: LocationInfo!
+  workProfile: WorkProfile!
+  verificationStatus: VerificationStatus!
+  documents: [Document!]!
+  workflowStatus: WorkflowStatus!
+  assignments: [Assignment!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Engineer {
+  id: ID!
+  registrationId: String!
+  personalInfo: PersonalInfo!
+  contactInfo: ContactInfo!
+  technicalProfile: TechnicalProfile!
+  locationInfo: LocationInfo!
+  verificationStatus: VerificationStatus!
+  assignments: [Assignment!]!
+  skills: [Skill!]!
+  documents: [Document!]!
+  workflowStatus: WorkflowStatus!
+  assessments: [SiteAssessment!]!
+  prescriptions: [TechnicalPrescription!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Retailer {
+  id: ID!
+  registrationId: String!
+  businessInfo: RetailerBusinessInfo!
+  contactInfo: ContactInfo!
+  locationInfo: LocationInfo!
+  salesInfo: SalesInfo!
+  approvalStatus: ApprovalStatus!
+  territory: Territory
+  documents: [Document!]!
+  workflowStatus: WorkflowStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PotentialSite {
+  id: ID!
+  registrationId: String!
+  siteInfo: SiteInfo!
+  customerInfo: CustomerInfo!
+  requirements: SiteRequirements!
+  assessments: [SiteAssessment!]!
+  prescriptions: [TechnicalPrescription!]!
+  assignedEngineers: [Engineer!]!
+  workflowStatus: WorkflowStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SiteInfo {
+  siteName: String!
+  siteType: SiteTypeEnum!
+  coordinates: Coordinates!
+  address: String!
+  accessibilityNotes: String
+  existingInfrastructure: String
+}
+
+type CustomerInfo {
+  name: String!
+  cnic: String!
+  contactInfo: ContactInfo!
+  electricityBill: ElectricityBillInfo
+}
+
+type ElectricityBillInfo {
+  monthlyConsumption: Float!
+  averageBill: Float!
+  connectionType: String!
+  sanctionedLoad: Float
+}
+
+type SiteRequirements {
+  systemType: SystemTypeEnum!
+  estimatedCapacity: Float!
+  budget: Float
+  timeframe: String
+  specificRequirements: String
+}
+
+type SiteAssessment {
+  id: ID!
+  siteId: String!
+  engineerId: String!
+  engineer: Engineer!
+  assessmentDate: DateTime!
+  technicalFindings: TechnicalFindings!
+  recommendations: [String!]!
+  photos: [String!]!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type TechnicalFindings {
+  roofCondition: String!
+  roofArea: Float!
+  roofOrientation: String!
+  shadingAnalysis: String!
+  structuralAssessment: String!
+  electricalAssessment: String!
+  gridConnection: String!
+  accessibilityAssessment: String!
+}
+
+type TechnicalPrescription {
+  id: ID!
+  siteId: String!
+  assessmentId: String!
+  engineerId: String!
+  engineer: Engineer!
+  systemDesign: SystemDesign!
+  componentSpecifications: [ComponentSpecification!]!
+  installationPlan: InstallationPlan!
+  costEstimate: CostEstimate!
+  timeline: ProjectTimeline!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SystemDesign {
+  systemCapacity: Float!
+  systemType: SystemTypeEnum!
+  panelConfiguration: String!
+  inverterConfiguration: String!
+  mountingSystem: String!
+  electricalDesign: String!
+}
+
+type ComponentSpecification {
+  category: String!
+  component: String!
+  specification: String!
+  quantity: Int!
+  unitPrice: Float!
+  totalPrice: Float!
+  supplier: String
+}
+
+type InstallationPlan {
+  phases: [InstallationPhase!]!
+  safetyRequirements: [String!]!
+  permits: [String!]!
+  inspections: [String!]!
+}
+
+type InstallationPhase {
+  phase: String!
+  description: String!
+  duration: String!
+  requirements: [String!]!
+}
+
+type CostEstimate {
+  componentCost: Float!
+  laborCost: Float!
+  installationCost: Float!
+  permitCost: Float!
+  totalCost: Float!
+  breakdown: [CostBreakdown!]!
+}
+
+type CostBreakdown {
+  category: String!
+  description: String!
+  amount: Float!
+}
+
+type ProjectTimeline {
+  estimatedStartDate: DateTime!
+  estimatedCompletionDate: DateTime!
+  phases: [TimelinePhase!]!
+  totalProjectTime: String!
+}
+
+type TimelinePhase {
+  phase: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  duration: String!
+}
+
+# ============================================================================
+# WORKFLOW AND SYSTEM TYPES
+# ============================================================================
+
+type WorkflowStatus {
+  id: ID!
+  entityType: EntityType!
+  entityId: String!
+  workflowType: String!
+  currentStep: String!
+  status: WorkflowStatusEnum!
+  steps: [WorkflowStep!]!
+  estimatedCompletion: DateTime
+  actualCompletion: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type WorkflowStep {
+  stepId: String!
+  stepName: String!
+  status: String!
+  assignedTo: String
+  completedBy: String
+  completedAt: DateTime
+  notes: String
+  attachments: [String!]
+}
+
+type Assignment {
+  id: ID!
+  entityType: EntityType!
+  entityId: String!
+  assignedTo: String!
+  assignedBy: String!
+  assignmentType: String!
+  status: String!
+  priority: String
+  dueDate: DateTime
+  completedAt: DateTime
+  notes: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Skill {
+  id: ID!
+  name: String!
+  category: String!
+  level: String!
+  certified: Boolean!
+  certificationDate: DateTime
+}
+
+type Territory {
+  id: ID!
+  name: String!
+  province: String!
+  districts: [String!]!
+  tehsils: [String!]!
+  assignedRetailers: [Retailer!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Document {
+  id: ID!
+  entityType: EntityType!
+  entityId: String!
+  documentType: DocumentTypeEnum!
+  fileName: String!
+  fileUrl: String!
+  fileSize: Int!
+  mimeType: String!
+  description: String
+  tags: [String!]
+  uploadedBy: String!
+  verificationStatus: VerificationStatusEnum
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Event {
+  id: ID!
+  eventType: String!
+  entityType: EntityType!
+  entityId: String!
+  data: JSON!
+  timestamp: DateTime!
+  source: String!
+  processed: Boolean!
+  processedAt: DateTime
+  error: String
+}
+
+type Notification {
+  id: ID!
+  recipientId: String!
+  recipientType: EntityType!
+  subject: String!
+  body: String!
+  channels: [NotificationChannelEnum!]!
+  priority: NotificationPriorityEnum!
+  status: String!
+  sentAt: DateTime
+  readAt: DateTime
+  createdAt: DateTime!
+}
+
+# ============================================================================
+# CONNECTION TYPES FOR PAGINATION
+# ============================================================================
+
+type ContractorConnection {
+  edges: [ContractorEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ContractorEdge {
+  node: Contractor!
+  cursor: String!
+}
+
+type EngineerConnection {
+  edges: [EngineerEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EngineerEdge {
+  node: Engineer!
+  cursor: String!
+}
+
+type RetailerConnection {
+  edges: [RetailerEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RetailerEdge {
+  node: Retailer!
+  cursor: String!
+}
+
+type SiteConnection {
+  edges: [SiteEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type SiteEdge {
+  node: PotentialSite!
+  cursor: String!
+}
+
+type WorkflowConnection {
+  edges: [WorkflowEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type WorkflowEdge {
+  node: WorkflowStatus!
+  cursor: String!
+}
+
+type EventConnection {
+  edges: [EventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EventEdge {
+  node: Event!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# ============================================================================
+# INPUT TYPES
+# ============================================================================
+
+input PaginationInput {
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+input TimeRangeInput {
+  startDate: DateTime!
+  endDate: DateTime!
+}
+
+input PersonalInfoInput {
+  firstName: String!
+  lastName: String!
+  cnic: String!
+  dateOfBirth: DateTime!
+  fatherName: String
+  gender: GenderEnum
+}
+
+input ContactInfoInput {
+  email: String!
+  phone: String!
+  alternatePhone: String
+  whatsappNumber: String
+}
+
+input LocationInfoInput {
+  province: String!
+  district: String!
+  tehsil: String!
+  union: String
+  village: String
+  address: String!
+  coordinates: CoordinatesInput
+}
+
+input CoordinatesInput {
+  latitude: Float!
+  longitude: Float!
+}
+
+input BusinessInfoInput {
+  businessName: String
+  businessType: BusinessTypeEnum
+  registrationNumber: String
+  taxNumber: String
+  bankAccountDetails: BankAccountDetailsInput
+}
+
+input BankAccountDetailsInput {
+  accountTitle: String!
+  accountNumber: String!
+  bankName: String!
+  branchCode: String
+  iban: String
+}
+
+input WorkProfileInput {
+  experienceYears: Int!
+  specializations: [SpecializationEnum!]!
+  workingRadius: Int!
+  certifications: [String!]
+  tools: [String!]
+  availability: AvailabilityEnum!
+  ratePerDay: Float
+}
+
+input CreateContractorInput {
+  personalInfo: PersonalInfoInput!
+  contactInfo: ContactInfoInput!
+  businessInfo: BusinessInfoInput
+  locationInfo: LocationInfoInput!
+  workProfile: WorkProfileInput!
+}
+
+input UpdateContractorInput {
+  personalInfo: PersonalInfoInput
+  contactInfo: ContactInfoInput
+  businessInfo: BusinessInfoInput
+  locationInfo: LocationInfoInput
+  workProfile: WorkProfileInput
+}
+
+input TechnicalProfileInput {
+  engineeringDiscipline: String!
+  licenseNumber: String!
+  experienceYears: Int!
+  specializations: [String!]!
+  certifications: [String!]!
+  workingRadius: Int!
+  availability: AvailabilityEnum!
+  ratePerDay: Float
+}
+
+input CreateEngineerInput {
+  personalInfo: PersonalInfoInput!
+  contactInfo: ContactInfoInput!
+  technicalProfile: TechnicalProfileInput!
+  locationInfo: LocationInfoInput!
+}
+
+input UpdateEngineerInput {
+  personalInfo: PersonalInfoInput
+  contactInfo: ContactInfoInput
+  technicalProfile: TechnicalProfileInput
+  locationInfo: LocationInfoInput
+}
+
+input RetailerBusinessInfoInput {
+  businessName: String!
+  businessType: BusinessTypeEnum!
+  registrationNumber: String
+  taxNumber: String
+  establishedYear: Int
+  employeeCount: Int
+  annualRevenue: Float
+  bankAccountDetails: BankAccountDetailsInput
+}
+
+input SalesInfoInput {
+  previousSolarExperience: Boolean!
+  targetMarket: [String!]!
+  salesChannels: [String!]!
+  expectedMonthlySales: Int
+  investmentCapacity: Float
+}
+
+input CreateRetailerInput {
+  businessInfo: RetailerBusinessInfoInput!
+  contactInfo: ContactInfoInput!
+  locationInfo: LocationInfoInput!
+  salesInfo: SalesInfoInput!
+}
+
+input UpdateRetailerInput {
+  businessInfo: RetailerBusinessInfoInput
+  contactInfo: ContactInfoInput
+  locationInfo: LocationInfoInput
+  salesInfo: SalesInfoInput
+}
+
+input SiteInfoInput {
+  siteName: String!
+  siteType: SiteTypeEnum!
+  coordinates: CoordinatesInput!
+  address: String!
+  accessibilityNotes: String
+  existingInfrastructure: String
+}
+
+input CustomerInfoInput {
+  name: String!
+  cnic: String!
+  contactInfo: ContactInfoInput!
+  electricityBill: ElectricityBillInfoInput
+}
+
+input ElectricityBillInfoInput {
+  monthlyConsumption: Float!
+  averageBill: Float!
+  connectionType: String!
+  sanctionedLoad: Float
+}
+
+input SiteRequirementsInput {
+  systemType: SystemTypeEnum!
+  estimatedCapacity: Float!
+  budget: Float
+  timeframe: String
+  specificRequirements: String
+}
+
+input CreateSiteInput {
+  siteInfo: SiteInfoInput!
+  customerInfo: CustomerInfoInput!
+  requirements: SiteRequirementsInput!
+}
+
+input UpdateSiteInput {
+  siteInfo: SiteInfoInput
+  customerInfo: CustomerInfoInput
+  requirements: SiteRequirementsInput
+}
+
+input VerificationInput {
+  action: String!
+  notes: String
+  documentVerifications: [DocumentVerificationInput!]
+  verifiedBy: String!
+}
+
+input DocumentVerificationInput {
+  documentType: DocumentTypeEnum!
+  status: VerificationStatusEnum!
+  notes: String
+}
+
+input ApprovalInput {
+  action: String!
+  notes: String
+  approvedBy: String!
+}
+
+input AssignmentInput {
+  assignmentType: String!
+  priority: String
+  dueDate: DateTime
+  notes: String
+}
+
+input AssessmentInput {
+  technicalFindings: TechnicalFindingsInput!
+  recommendations: [String!]!
+  photos: [String!]!
+}
+
+input TechnicalFindingsInput {
+  roofCondition: String!
+  roofArea: Float!
+  roofOrientation: String!
+  shadingAnalysis: String!
+  structuralAssessment: String!
+  electricalAssessment: String!
+  gridConnection: String!
+  accessibilityAssessment: String!
+}
+
+input PrescriptionInput {
+  systemDesign: SystemDesignInput!
+  componentSpecifications: [ComponentSpecificationInput!]!
+  installationPlan: InstallationPlanInput!
+  costEstimate: CostEstimateInput!
+  timeline: ProjectTimelineInput!
+}
+
+input SystemDesignInput {
+  systemCapacity: Float!
+  systemType: SystemTypeEnum!
+  panelConfiguration: String!
+  inverterConfiguration: String!
+  mountingSystem: String!
+  electricalDesign: String!
+}
+
+input ComponentSpecificationInput {
+  category: String!
+  component: String!
+  specification: String!
+  quantity: Int!
+  unitPrice: Float!
+  totalPrice: Float!
+  supplier: String
+}
+
+input InstallationPlanInput {
+  phases: [InstallationPhaseInput!]!
+  safetyRequirements: [String!]!
+  permits: [String!]!
+  inspections: [String!]!
+}
+
+input InstallationPhaseInput {
+  phase: String!
+  description: String!
+  duration: String!
+  requirements: [String!]!
+}
+
+input CostEstimateInput {
+  componentCost: Float!
+  laborCost: Float!
+  installationCost: Float!
+  permitCost: Float!
+  totalCost: Float!
+  breakdown: [CostBreakdownInput!]!
+}
+
+input CostBreakdownInput {
+  category: String!
+  description: String!
+  amount: Float!
+}
+
+input ProjectTimelineInput {
+  estimatedStartDate: DateTime!
+  estimatedCompletionDate: DateTime!
+  phases: [TimelinePhaseInput!]!
+  totalProjectTime: String!
+}
+
+input TimelinePhaseInput {
+  phase: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  duration: String!
+}
+
+input AdvanceWorkflowInput {
+  action: String!
+  notes: String
+  approvedBy: String
+  attachments: [String!]
+}
+
+input UploadDocumentInput {
+  file: Upload!
+  entityType: EntityType!
+  entityId: String!
+  documentType: DocumentTypeEnum!
+  description: String
+  tags: [String!]
+}
+
+input GenerateDocumentInput {
+  templateId: String!
+  data: JSON!
+  outputFormat: String
+  fileName: String
+}
+
+input SendNotificationInput {
+  recipients: [NotificationRecipientInput!]!
+  subject: String!
+  body: String!
+  channels: [NotificationChannelEnum!]!
+  priority: NotificationPriorityEnum
+  scheduledAt: DateTime
+  templateId: String
+  variables: JSON
+}
+
+input NotificationRecipientInput {
+  id: String!
+  type: EntityType!
+  contactInfo: JSON
+}
+
+# ============================================================================
+# FILTER INPUT TYPES
+# ============================================================================
+
+input ContractorFilter {
+  name: String
+  cnic: String
+  phone: String
+  district: String
+  tehsil: String
+  verificationStatus: VerificationStatusEnum
+  specializations: [SpecializationEnum!]
+  experienceYears: IntRange
+  workingRadius: IntRange
+  availability: AvailabilityEnum
+}
+
+input EngineerFilter {
+  name: String
+  cnic: String
+  phone: String
+  district: String
+  tehsil: String
+  verificationStatus: VerificationStatusEnum
+  engineeringDiscipline: String
+  specializations: [String!]
+  experienceYears: IntRange
+  workingRadius: IntRange
+  availability: AvailabilityEnum
+}
+
+input RetailerFilter {
+  businessName: String
+  district: String
+  tehsil: String
+  approvalStatus: ApprovalStatusEnum
+  businessType: BusinessTypeEnum
+  previousSolarExperience: Boolean
+  establishedYear: IntRange
+}
+
+input SiteFilter {
+  siteName: String
+  siteType: SiteTypeEnum
+  district: String
+  tehsil: String
+  systemType: SystemTypeEnum
+  estimatedCapacity: FloatRange
+  budget: FloatRange
+  customerName: String
+}
+
+input WorkflowFilter {
+  entityType: EntityType
+  entityId: String
+  workflowType: String
+  status: WorkflowStatusEnum
+  currentStep: String
+}
+
+input EventFilter {
+  eventType: String
+  entityType: EntityType
+  entityId: String
+  source: String
+  processed: Boolean
+  timeRange: TimeRangeInput
+}
+
+input IntRange {
+  min: Int
+  max: Int
+}
+
+input FloatRange {
+  min: Float
+  max: Float
+}
+
+# ============================================================================
+# PAYLOAD TYPES
+# ============================================================================
+
+type ContractorPayload {
+  success: Boolean!
+  contractor: Contractor
+  errors: [String!]
+  message: String
+}
+
+type EngineerPayload {
+  success: Boolean!
+  engineer: Engineer
+  errors: [String!]
+  message: String
+}
+
+type RetailerPayload {
+  success: Boolean!
+  retailer: Retailer
+  errors: [String!]
+  message: String
+}
+
+type SitePayload {
+  success: Boolean!
+  site: PotentialSite
+  errors: [String!]
+  message: String
+}
+
+type VerificationPayload {
+  success: Boolean!
+  verificationStatus: VerificationStatus
+  workflowStatus: WorkflowStatus
+  errors: [String!]
+  message: String
+}
+
+type ApprovalPayload {
+  success: Boolean!
+  approvalStatus: ApprovalStatus
+  workflowStatus: WorkflowStatus
+  errors: [String!]
+  message: String
+}
+
+type AssignmentPayload {
+  success: Boolean!
+  assignment: Assignment
+  errors: [String!]
+  message: String
+}
+
+type AssessmentPayload {
+  success: Boolean!
+  assessment: SiteAssessment
+  errors: [String!]
+  message: String
+}
+
+type PrescriptionPayload {
+  success: Boolean!
+  prescription: TechnicalPrescription
+  errors: [String!]
+  message: String
+}
+
+type WorkflowPayload {
+  success: Boolean!
+  workflowStatus: WorkflowStatus
+  errors: [String!]
+  message: String
+}
+
+type DocumentPayload {
+  success: Boolean!
+  document: Document
+  errors: [String!]
+  message: String
+}
+
+type NotificationPayload {
+  success: Boolean!
+  notification: Notification
+  errors: [String!]
+  message: String
+}
+
+# ============================================================================
+# ANALYTICS TYPES
+# ============================================================================
+
+type RegistrationStats {
+  totalContractors: Int!
+  totalEngineers: Int!
+  totalRetailers: Int!
+  totalSites: Int!
+  verifiedContractors: Int!
+  verifiedEngineers: Int!
+  approvedRetailers: Int!
+  completedAssessments: Int!
+  timeRange: TimeRangeInput!
+  breakdown: RegistrationBreakdown!
+}
+
+type RegistrationBreakdown {
+  byProvince: [ProvinceStats!]!
+  byDistrict: [DistrictStats!]!
+  byMonth: [MonthlyStats!]!
+}
+
+type ProvinceStats {
+  province: String!
+  contractors: Int!
+  engineers: Int!
+  retailers: Int!
+  sites: Int!
+}
+
+type DistrictStats {
+  district: String!
+  province: String!
+  contractors: Int!
+  engineers: Int!
+  retailers: Int!
+  sites: Int!
+}
+
+type MonthlyStats {
+  month: String!
+  year: Int!
+  contractors: Int!
+  engineers: Int!
+  retailers: Int!
+  sites: Int!
+}
+
+type WorkflowMetrics {
+  entityType: EntityType!
+  totalWorkflows: Int!
+  activeWorkflows: Int!
+  completedWorkflows: Int!
+  pausedWorkflows: Int!
+  cancelledWorkflows: Int!
+  averageCompletionTime: Float!
+  timeRange: TimeRangeInput!
+  stepMetrics: [WorkflowStepMetrics!]!
+}
+
+type WorkflowStepMetrics {
+  stepName: String!
+  totalSteps: Int!
+  completedSteps: Int!
+  averageTimeToComplete: Float!
+  bottlenecks: Int!
+}
+
+type TerritoryAnalytics {
+  territory: Territory!
+  totalRetailers: Int!
+  activeRetailers: Int!
+  totalSites: Int!
+  completedAssessments: Int!
+  totalPrescriptions: Int!
+  averageSystemCapacity: Float!
+  totalEstimatedRevenue: Float!
+  performanceMetrics: TerritoryPerformanceMetrics!
+}
+
+type TerritoryPerformanceMetrics {
+  conversionRate: Float!
+  averageAssessmentTime: Float!
+  averagePrescriptionTime: Float!
+  customerSatisfactionScore: Float!
+}
+
+# ============================================================================
+# ROOT TYPES
+# ============================================================================
+
+type Query {
+  # Entity Queries
+  contractor(id: ID!): Contractor
+  contractors(filter: ContractorFilter, pagination: PaginationInput): ContractorConnection!
+  
+  engineer(id: ID!): Engineer
+  engineers(filter: EngineerFilter, pagination: PaginationInput): EngineerConnection!
+  
+  retailer(id: ID!): Retailer
+  retailers(filter: RetailerFilter, pagination: PaginationInput): RetailerConnection!
+  
+  site(id: ID!): PotentialSite
+  sites(filter: SiteFilter, pagination: PaginationInput): SiteConnection!
+  
+  # Workflow Queries
+  workflow(id: ID!): WorkflowStatus
+  workflows(filter: WorkflowFilter, pagination: PaginationInput): WorkflowConnection!
+  
+  # Event Queries
+  events(filter: EventFilter, pagination: PaginationInput): EventConnection!
+  
+  # Document Queries
+  document(id: ID!): Document
+  documents(entityType: EntityType!, entityId: String!): [Document!]!
+  
+  # Assignment Queries
+  assignment(id: ID!): Assignment
+  assignments(entityType: EntityType, entityId: String, assignedTo: String): [Assignment!]!
+  
+  # Territory Queries
+  territory(id: ID!): Territory
+  territories: [Territory!]!
+  
+  # Analytics Queries
+  registrationStats(timeRange: TimeRangeInput): RegistrationStats!
+  workflowMetrics(entityType: EntityType, timeRange: TimeRangeInput): WorkflowMetrics!
+  territoryAnalytics(territoryId: ID!): TerritoryAnalytics!
+}
+
+type Mutation {
+  # Contractor Mutations
+  createContractor(input: CreateContractorInput!): ContractorPayload!
+  updateContractor(id: ID!, input: UpdateContractorInput!): ContractorPayload!
+  verifyContractor(id: ID!, input: VerificationInput!): VerificationPayload!
+  
+  # Engineer Mutations
+  createEngineer(input: CreateEngineerInput!): EngineerPayload!
+  updateEngineer(id: ID!, input: UpdateEngineerInput!): EngineerPayload!
+  verifyEngineer(id: ID!, input: VerificationInput!): VerificationPayload!
+  assignEngineer(id: ID!, input: AssignmentInput!): AssignmentPayload!
+  
+  # Retailer Mutations
+  createRetailer(input: CreateRetailerInput!): RetailerPayload!
+  updateRetailer(id: ID!, input: UpdateRetailerInput!): RetailerPayload!
+  approveRetailer(id: ID!, input: ApprovalInput!): ApprovalPayload!
+  
+  # Site Mutations
+  createSite(input: CreateSiteInput!): SitePayload!
+  updateSite(id: ID!, input: UpdateSiteInput!): SitePayload!
+  assessSite(id: ID!, input: AssessmentInput!): AssessmentPayload!
+  prescribeSite(id: ID!, input: PrescriptionInput!): PrescriptionPayload!
+  
+  # Workflow Mutations
+  advanceWorkflow(id: ID!, input: AdvanceWorkflowInput!): WorkflowPayload!
+  pauseWorkflow(id: ID!, reason: String): WorkflowPayload!
+  resumeWorkflow(id: ID!): WorkflowPayload!
+  
+  # Document Mutations
+  uploadDocument(input: UploadDocumentInput!): DocumentPayload!
+  generateDocument(input: GenerateDocumentInput!): DocumentPayload!
+  
+  # Notification Mutations
+  sendNotification(input: SendNotificationInput!): NotificationPayload!
+}
+
+type Subscription {
+  # Real-time Entity Updates
+  contractorUpdated(id: ID): Contractor!
+  engineerUpdated(id: ID): Engineer!
+  retailerUpdated(id: ID): Retailer!
+  siteUpdated(id: ID): PotentialSite!
+  
+  # Workflow Updates
+  workflowStatusChanged(entityType: EntityType, entityId: ID): WorkflowStatus!
+  
+  # Event Stream
+  eventPublished(eventTypes: [String!], entityTypes: [EntityType!]): Event!
+  
+  # Notification Updates
+  notificationReceived(userId: ID!): Notification!
+  
+  # Assignment Updates
+  assignmentCreated(assignedTo: String!): Assignment!
+  assignmentUpdated(assignedTo: String!): Assignment!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

@@ -1,0 +1,63 @@
+@startuml
+skinparam backgroundColor #f9f9f9
+skinparam defaultFontName Arial
+skinparam defaultFontSize 18
+skinparam defaultFontWeight bold
+
+skinparam arrow {
+    Color #FF0000
+    Thickness 4
+}
+
+skinparam activity {
+    BackgroundColor #FFFFFF
+    BorderColor #FF6347
+    FontColor #000000
+    FontSize 18
+    FontWeight bold
+    Shadowing true
+    RoundCorner 15
+}
+
+skinparam swimlane {
+    BackgroundColor #EFEFEF
+    FontColor Black
+    FontWeight bold
+    BorderColor #FF6347
+}
+
+title <size:28><color:#FF0000>User Journey - Consultant Engineer Registration</color></size>
+
+|B DO|
+start
+:Login to Google;
+:Open Form;
+
+
+|Enginner Registration Form|
+:Engineer Name, ID;
+:Phone Number, Email Address;
+:Address with Organization Name;
+:Designation of Organization;
+:District Name Of Working Area;
+:Thana Of Working Area;
+:Concerned BD Officer;
+:Select Education, Engineer Classification;
+:Submit;
+
+
+|WhatsApp Notification|
+:C RO;
+:B DO;
+
+|Data Bank|
+:Stored Engineer Data;
+
+|C R M|
+:View Engineer Data;
+:Verify;
+:Approve or Reject;
+
+stop
+
+@enduml

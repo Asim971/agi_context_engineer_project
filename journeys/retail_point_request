@@ -1,0 +1,17 @@
+@startuml
+title <size:28><color:#FF0000>User Journey - Retail Point Request</color></size>
+|B DO|
+start
+:Login to Google;
+:Open Form;
+|Retail Request Form|
+:Territory;
+:Location;
+:Select Company;
+:Submit;
+|WhatsApp Notification|
+:B DO;
+|Data Sheet|
+:View Individual Data;
+stop
+@enduml
