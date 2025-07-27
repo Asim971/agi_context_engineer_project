@@ -1,0 +1,59 @@
+@startuml
+skinparam backgroundColor #f9f9f9
+skinparam defaultFontName Arial
+skinparam defaultFontSize 18
+skinparam defaultFontWeight bold
+
+skinparam arrow {
+    Color #FF0000
+    Thickness 4
+}
+
+skinparam activity {
+    BackgroundColor #FFFFFF
+    BorderColor #FF6347
+    FontColor #000000
+    FontSize 18
+    FontWeight bold
+    Shadowing true
+    RoundCorner 15
+}
+
+skinparam swimlane {
+    BackgroundColor #EFEFEF
+    FontColor Black
+    FontWeight bold
+    BorderColor #FF6347
+}
+
+title <size:28><color:#FF0000>Overall User Journey - Sales Ecosystem Registrations</color></size>
+
+|User (SR, CRO, BDO)|
+start
+:Login to Google;
+:Select and Open Relevant Form (Contractor, Engineer, Retailer, Potential Site);
+
+|Registration Form|
+:Enter Details (Name, Phone, Address, etc. specific to type);
+:Submit Form;
+
+|Apps Script Handling|
+:Process Submission;
+:Lookup Relevant Contacts (e.g., SR WhatsApp from SR_Reg, BD from BD_reg, CRO from cro_reg);
+:Append to CRM Approvals Tab (e.g., Contractor Approvals, Potential Site Approvals);
+
+|WhatsApp Notification|
+:Send Notification to Relevant Parties (e.g., SR, CRO, BDO) with Details;
+
+|Data Bank|
+:Store Data in Respective Sheets;
+
+|CRM|
+:View Submitted Data in Approvals Tab;
+:Verify Details;
+:Update Status (Approve/Reject);
+:Trigger Status Update Notification via WhatsApp;
+
+stop
+
+@enduml
