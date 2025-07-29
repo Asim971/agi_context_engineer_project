@@ -16,15 +16,24 @@ function setupCRMSheet() {
 }
 
 function onEdit(e) {
+  Logger.log('onEdit triggered');
   var range = e.range;
   var sheet = range.getSheet();
-  if (sheet.getName() !== 'Retailer Approvals' || range.getColumn() !== 13) return;
+  if (sheet.getName() !== 'Retailer Approvals' || range.getColumn() !== 13) {
+    Logger.log('Edit not in Retailer Approvals or not in column 13');
+    return;
+  }
 
   var status = range.getValue();
-  if (status !== 'Approved' && status !== 'Rejected') return;
+  Logger.log('Status changed to: ' + status);
+  if (status !== 'Approved' && status !== 'Rejected') {
+    Logger.log('Status not Approved or Rejected');
+    return;
+  }
 
   var row = range.getRow();
   var rowData = sheet.getRange(row, 1, 1, 14).getValues()[0];
+  Logger.log('Row data: ' + JSON.stringify(rowData));
   var timestamp = rowData[0];
   var emailAddress = rowData[1];
   var shopName = rowData[2];
@@ -51,7 +60,15 @@ function onEdit(e) {
                   'Status: ' + status + '\n' +
                   'Update Date: ' + new Date().toLocaleString() + '\n' +
                   'Notes: ' + notes;
-    sendWhatsAppMessage(srWhatsapp, message);
+    Logger.log('Sending message to ' + srWhatsapp + ': ' + message);
+    try {
+      sendWhatsAppMessage(srWhatsapp, message);
+      Logger.log('Message sent successfully');
+    } catch (error) {
+      Logger.log('Error sending message: ' + error);
+    }
+  } else {
+    Logger.log('No srWhatsapp found for this row');
   }
 }
 

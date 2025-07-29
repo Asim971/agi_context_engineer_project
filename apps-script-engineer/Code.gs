@@ -29,6 +29,8 @@ function setupTriggers() {
 }
 
 function onFormSubmit(e) {
+  Logger.log('onFormSubmit triggered');
+  Logger.log('Event values: ' + JSON.stringify(e.values));
   var originalSs = SpreadsheetApp.openById(SPREADSHEET_ID);
   var crmSs = SpreadsheetApp.openById(CRM_SPREADSHEET_ID);
   var responseSheet = originalSs.getSheetByName('Form Responses 1');
@@ -84,11 +86,17 @@ function onFormSubmit(e) {
                      'Classification: ' + classification + '\n' +
                      'Status: ' + status + '\n' +
                      'Submission Date: ' + timestamp;
+    Logger.log('Sending message to CRO phone: ' + croPhone);
+    Logger.log('Message: ' + croMessage);
     sendWhatsAppMessage(croPhone, croMessage);
+    Logger.log('Message sent to ' + croPhone);
+  } else {
+    Logger.log('No CRO phone found for email: ' + submitterEmail);
   }
 }
 
 function sendWhatsAppMessage(phone, message) {
+  Logger.log('sendWhatsAppMessage called with phone: ' + phone + ' and message: ' + message);
   var url = 'https://api.maytapi.com/api/55968f1b-01dc-4f02-baca-af83b92ca455/90126/sendMessage';
   var payload = {
     'to_number': phone,
@@ -103,8 +111,12 @@ function sendWhatsAppMessage(phone, message) {
       'x-maytapi-key': '183bcf62-cf0e-4e1d-9f22-59b0a730cd0b'
     }
   };
-  UrlFetchApp.fetch(url, options);
-  // Note: Replace with actual mytapi credentials
+  try {
+    var response = UrlFetchApp.fetch(url, options);
+    Logger.log('WhatsApp API response: ' + response.getContentText());
+  } catch (error) {
+    Logger.log('Error sending WhatsApp message: ' + error.toString());
+  }
 }
 
 function importMissingResponses() {
@@ -211,5 +223,20 @@ function sendBatchMessages(messages) {
     if (m % 10 === 0 && m > 0) {
       Utilities.sleep(1000); // 1 second delay every 10 messages
     }
+  }
+}
+
+
+function createCROregSheet() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('cro_reg');
+  if (!sheet) {
+    sheet = ss.insertSheet('cro_reg');
+    var headers = ['CRO Email', 'CRO Name', 'Phone Number'];
+    sheet.appendRow(headers);
+    sheet.setFrozenRows(1);
+    // Add any data validation or formatting if needed
+  } else {
+    Logger.log('cro_reg sheet already exists.');
   }
 }
