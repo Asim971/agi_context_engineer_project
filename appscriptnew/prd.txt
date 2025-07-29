@@ -1,0 +1,36 @@
+# Overview  
+This project is an AppScript project located at e:\Anwar_sales_eco\appscriptnew. It aims to automate and enhance sales-related processes for better efficiency and data management.
+
+# Core Features  
+- Automation of sales data entry and processing
+- Integration with Google Sheets and other Google Workspace tools
+- Custom reporting and analytics dashboards
+
+# User Experience  
+- User personas: Sales team members, sales managers
+- Key user flows: Data input, report generation, notifications
+- UI/UX considerations: Simple, intuitive interfaces within Google Workspace
+
+# Technical Architecture  
+- System components: Google Apps Script backend, Google Sheets frontend
+- Data models: Sales records, user profiles, reports
+- APIs and integrations: Google Sheets API, Gmail API
+- Infrastructure requirements: Google Workspace environment
+
+# Development Roadmap  
+- MVP requirements: Basic data entry automation, simple reports
+- Future enhancements: Advanced analytics, notifications, multi-user support
+
+# Logical Dependency Chain
+- Build data models and backend automation first
+- Develop frontend interfaces and reporting
+- Add integrations and enhancements
+
+# Risks and Mitigations  
+- Technical challenges: API limitations, script execution quotas
+- MVP scope: Focus on core automation features
+- Resource constraints: Prioritize tasks and phases
+
+# Appendix  
+- Research findings: Google Apps Script capabilities
+- Technical specifications: Script triggers, API usage limits
