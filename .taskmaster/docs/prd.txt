@@ -1,49 +1,205 @@
-# Product Requirements Document (PRD) - Anwar Sales Management System
+# Product Requirements Document (PRD) - Anwar Sales Management System Codebase Restructuring
 
 ## Overview
-The Anwar Sales Management System is a comprehensive platform for managing registrations of contractors, engineers, retailers, and potential sites, with integrated workflows, notifications, and data management. This PRD is derived from the Business Requirements Document, User Stories, Acceptance Criteria, and Architecture Decision Records.
+The Anwar Sales Management System codebase has become messy and requires comprehensive restructuring to improve maintainability, scalability, and developer experience. This PRD outlines the systematic approach to reorganize the codebase while preserving existing functionality.
 
 ## Business Objectives
-- Improve operational efficiency by reducing manual processing.
-- Ensure data accuracy and compliance.
-- Enhance customer experience through streamlined processes.
-- Support scalability for business growth.
+- **Maintainability**: Reduce technical debt and improve code readability
+- **Scalability**: Create a structure that supports future growth and new features
+- **Developer Experience**: Establish clear patterns and reduce onboarding time
+- **Performance**: Optimize build processes and reduce deployment complexity
+- **Testing**: Enable comprehensive testing strategies
 
-## Key Features
-### Registration Systems
-- Contractor Registration: Form submission, notifications, verification workflow.
-- Engineer Registration: Qualification verification, management.
-- Retailer Registration: Business information collection, triple notifications.
-- Potential Site Registration: Data collection, business integration.
-- Site Prescription: Workflow management, document generation.
-- Site Updates: Information maintenance.
+## Current State Analysis
+### Identified Issues
+1. **Inconsistent File Organization**
+   - Mixed file types in root directory
+   - No clear separation of concerns
+   - Duplicate configuration files
 
-### System Administration
-- User role management.
-- Monitoring and analytics.
-- Data export and reporting.
+2. **Configuration Chaos**
+   - Multiple config files with overlapping settings
+   - Hardcoded values scattered throughout codebase
+   - No environment-specific configurations
 
-### Mobile and Offline
-- Responsive interface.
-- Offline synchronization.
+3. **Documentation Fragmentation**
+   - Scattered documentation across multiple formats
+   - Outdated README files
+   - Missing API documentation
 
-### Integrations
-- Google Workspace.
-- WhatsApp Business API.
+4. **Build & Deployment Issues**
+   - Unclear build processes
+   - Missing CI/CD configuration
+   - No standardized deployment scripts
 
-## Non-Functional Requirements
-- Performance: <3s response time.
-- Availability: 99.9% uptime.
-- Security: Encryption, RBAC.
-- Scalability: Handle 5x load.
+5. **Testing Infrastructure**
+   - Inconsistent test file locations
+   - Missing test configurations
+   - No clear testing strategy documentation
 
-## Architecture
-- Google Apps Script runtime.
-- Google Sheets as MVP database.
-- Event-driven microservices.
-- MyTAPI for WhatsApp.
+## Restructuring Requirements
 
-## Detailed Requirements
-[Insert summarized content from BRD, User Stories, Acceptance Criteria, and ADRs here, ensuring alignment with guidelines in ai-guidelines.md, mission.md, sales-eco-spec.md, code-standards.md, and AGENT_COORDINATION_GUIDE.md]
+### 1. Root Directory Structure
+**Current**: Cluttered root with mixed files
+**Target**: Clean root with clear directory separation
 
-This PRD serves as the basis for task breakdown and implementation.
+```
+anwar-sales-eco/
+├── src/                    # Source code
+├── tests/                  # Test files
+├── docs/                   # Documentation
+├── config/                 # Configuration files
+├── scripts/                # Build and deployment scripts
+├── .github/                # GitHub workflows
+├── public/                 # Static assets
+├── tools/                  # Development tools
+├── package.json           # Main package configuration
+├── README.md              # Main project documentation
+└── .gitignore             # Git ignore rules
+```
+
+### 2. Source Code Organization
+**Current**: Flat structure with mixed concerns
+**Target**: Modular architecture with clear boundaries
+
+```
+src/
+├── modules/               # Feature modules
+│   ├── registration/      # All registration types
+│   ├── workflow/          # Workflow management
+│   ├── notifications/     # Notification system
+│   └── admin/            # Admin functionality
+├── shared/                # Shared utilities
+│   ├── utils/            # Utility functions
+│   ├── types/            # TypeScript types
+│   └── constants/        # Application constants
+├── services/              # External services
+│   ├── google/           # Google services
+│   ├── whatsapp/         # WhatsApp integration
+│   └── database/         # Database layer
+└── config/               # Runtime configuration
+```
+
+### 3. Configuration Management
+**Current**: Scattered configuration files
+**Target**: Centralized, environment-specific configs
+
+- **config/
+  - development.json
+  - production.json
+  - test.json
+  - default.json
+- **.env** files for sensitive data
+- **config/index.js** for configuration loader
+
+### 4. Documentation Structure
+**Current**: Fragmented documentation
+**Target**: Comprehensive, organized documentation
+
+- **docs/
+  - api/                    # API documentation
+  - architecture/           # Architecture decisions
+  - deployment/            # Deployment guides
+  - development/           # Development setup
+  - user-guides/          # User documentation
+- **README.md** with clear navigation
+- **CHANGELOG.md** for version tracking
+
+### 5. Testing Infrastructure
+**Current**: Inconsistent test organization
+**Target**: Comprehensive testing strategy
+
+- **tests/
+  - unit/                  # Unit tests
+  - integration/          # Integration tests
+  - e2e/                  # End-to-end tests
+  - fixtures/             # Test data
+- **jest.config.js** for test configuration
+- **.test-setup.js** for test utilities
+
+### 6. Build & Deployment
+**Current**: Unclear build processes
+**Target**: Automated, reproducible builds
+
+- **scripts/
+  - build.js              # Build script
+  - deploy.js             # Deployment script
+  - dev.js                # Development server
+  - test.js               # Test runner
+- **.github/workflows/
+  - ci.yml               # Continuous integration
+  - deploy.yml           # Deployment pipeline
+
+### 7. Development Tools
+**Current**: Missing development tooling
+**Target**: Complete development environment
+
+- **tools/
+  - generators/           # Code generators
+  - linters/             # Linting configurations
+  - formatters/          # Code formatting
+- **.editorconfig** for consistent formatting
+- **.eslintrc.js** for code quality
+
+## Implementation Strategy
+
+### Phase 1: Foundation (Week 1)
+- [ ] Create new directory structure
+- [ ] Move existing files to appropriate locations
+- [ ] Update import paths
+- [ ] Create basic configuration files
+
+### Phase 2: Configuration (Week 2)
+- [ ] Implement centralized configuration system
+- [ ] Set up environment-specific configs
+- [ ] Create configuration documentation
+- [ ] Test configuration loading
+
+### Phase 3: Documentation (Week 3)
+- [ ] Create comprehensive README
+- [ ] Document new structure
+- [ ] Create development setup guide
+- [ ] Update API documentation
+
+### Phase 4: Testing (Week 4)
+- [ ] Set up testing framework
+- [ ] Organize existing tests
+- [ ] Create test utilities
+- [ ] Write missing tests
+
+### Phase 5: Automation (Week 5)
+- [ ] Set up CI/CD pipeline
+- [ ] Create build scripts
+- [ ] Implement deployment automation
+- [ ] Add pre-commit hooks
+
+## Success Criteria
+- [ ] All files organized in logical structure
+- [ ] Configuration centralized and documented
+- [ ] Tests pass in new structure
+- [ ] Documentation is complete and up-to-date
+- [ ] CI/CD pipeline is functional
+- [ ] Developer onboarding time reduced by 50%
+- [ ] Build time improved by 30%
+
+## Risk Mitigation
+- **Breaking Changes**: Use git branches for each phase
+- **Configuration Loss**: Backup existing configs before migration
+- **Testing Gaps**: Maintain existing test coverage during transition
+- **Documentation Drift**: Update docs immediately after code changes
+
+## Dependencies
+- Node.js 16+
+- Git for version control
+- Access to Google Apps Script environment
+- WhatsApp Business API credentials
+- Google Workspace API access
+
+## Future Considerations
+- Microservices architecture support
+- Docker containerization
+- Cloud deployment options
+- Monitoring and logging integration
+- Performance optimization strategies
+
+This PRD provides the foundation for systematically restructuring the Anwar Sales Management System codebase while maintaining functionality and improving long-term maintainability.

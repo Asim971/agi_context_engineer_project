@@ -1,4 +1,7 @@
 # Logs
+
+# Ignore sensitive client secret files
+/apps-script/client_secret_*.json
 logs
 *.log
 npm-debug.log*
@@ -24,6 +27,7 @@ node_modules/
 # OS specific
 .DS_Store
 
+
 # Task files
-tasks.json
-tasks/ 
+# tasks.json
+# tasks/ 
