@@ -91,6 +91,9 @@ var TestEnvironmentService = (function() {
           case 'Visit':
             triggerFunction = 'onVisitFormSubmit';
             break;
+          case 'BD Lead':
+            triggerFunction = 'onBDLeadFormSubmit';
+            break;
           default:
             Logger.log('No trigger function defined for form type: ' + formType);
             return;

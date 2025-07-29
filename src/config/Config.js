@@ -33,6 +33,7 @@ var Config = {
     DEMARCATION: 'Demarcation',
     ADMINISTRATIVE_SETTINGS: 'Administrative Settings',
     BD_LEAD: 'BD Lead CRM',
+    SR: 'Sales Representative CRM',
     ID_TRACKING: 'ID Tracking'
   },
   
@@ -46,7 +47,8 @@ var Config = {
     ENGINEER: '1a2b3c4d5e6f7g8h9i0j',
     POTENTIAL_SITE: '16FOGBAvAS2ac85EaJuUARaQE60wEMAG5oA9Iz4xtA9g',
     RETAILER: '1LBy0y-emr08r1ccJoOzuDe7oIw2VS4hUJGFi3s_0NHE',
-    BD_LEAD: 'YOUR_BD_LEAD_FORM_ID_HERE' // IMPORTANT: Replace with a real form ID
+    BD_LEAD: 'YOUR_BD_LEAD_FORM_ID_HERE', // IMPORTANT: Replace with a real form ID
+    SR: 'YOUR_SR_FORM_ID_HERE' // IMPORTANT: Replace with a real form ID
   },
   
   // Legacy existing form IDs (set to empty string if no existing forms to import)
@@ -85,6 +87,9 @@ var Config = {
     ],
     BD_LEAD: [
         'Timestamp', 'User Name', 'Designation', 'Line Manager', 'Nation', 'Phone Number', 'Email Address'
+    ],
+    SR: [
+        'Timestamp', 'SR Name', 'Line Manager', 'Business Unit', 'Nation', 'Division', 'Zone', 'Area', 'Territory', 'Phone Number', 'Email Address', 'Status', 'SR ID', 'Created By', 'Last Updated'
     ],
     ID_TRACKING: [
         'Form Type', 'Prefix', 'Last ID'

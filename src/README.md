@@ -169,3 +169,145 @@ For issues or questions:
 - [ ] Add batch processing features
 - [ ] Implement user management
 - [ ] Add analytics and insights
+
+## Detailed Product Requirements Document (PRD)
+
+### Overview
+
+The Anwar Sales Ecosystem is a unified Google Apps Script project designed to streamline sales operations, data management, and communication. It integrates legacy systems with modern functionalities, providing a scalable and maintainable solution.
+
+### Modules
+
+#### 1. Configuration
+
+- **Purpose**: Centralized management of constants and settings.
+
+- **Key Features**:
+
+  - Sheet names and headers.
+
+  - Form IDs for Google Forms.
+
+  - API keys and URLs.
+
+#### 2. Database Service
+
+- **Purpose**: Abstracts Google Sheets operations.
+
+- **Key Features**:
+
+  - Sheet initialization and header management.
+
+  - Record insertion, updating, and retrieval.
+
+  - Data validation and ID generation.
+
+#### 3. Handlers
+
+- **Purpose**: Manage form submissions and sheet edits.
+
+- **Key Features**:
+
+  - Routing based on form IDs.
+
+  - Data validation and processing.
+
+  - Integration with WhatsApp for notifications.
+
+#### 4. Services
+
+- **Purpose**: Provide specialized functionalities.
+
+- **Key Features**:
+
+  - WhatsApp messaging.
+
+  - Location-based operations.
+
+  - Test environment setup.
+
+  - Data migration.
+
+#### 5. Legacy Support
+
+- **Purpose**: Ensure backward compatibility.
+
+- **Key Features**:
+
+  - Legacy sheet initialization.
+
+  - Legacy trigger setup.
+
+### Functional Requirements
+
+#### 1. Form Submission
+
+- **Input**: Data from Google Forms.
+
+- **Process**:
+
+  - Validate data.
+
+  - Insert into appropriate sheets.
+
+  - Notify relevant users.
+
+- **Output**: Updated sheets and notifications.
+
+#### 2. Sheet Edit
+
+- **Input**: Edited data in Google Sheets.
+
+- **Process**:
+
+  - Validate changes.
+
+  - Update related records.
+
+  - Notify relevant users.
+
+- **Output**: Updated records and notifications.
+
+#### 3. WhatsApp Integration
+
+- **Input**: Message templates and recipient data.
+
+- **Process**:
+
+  - Format messages.
+
+  - Send via Maytapi API.
+
+- **Output**: Sent messages and logs.
+
+#### 4. Data Migration
+
+- **Input**: Legacy form data.
+
+- **Process**:
+
+  - Map data to new structure.
+
+  - Insert into sheets.
+
+- **Output**: Migrated data.
+
+### Non-Functional Requirements
+
+- **Scalability**: Support for additional modules and forms.
+
+- **Maintainability**: Modular architecture.
+
+- **Reliability**: Error handling and logging.
+
+### Future Enhancements
+
+- **Reporting**: Add analytics and insights.
+
+- **Dashboard**: Create an admin interface.
+
+- **Batch Processing**: Implement bulk operations.
+
+---
+
+This PRD serves as a comprehensive guide for understanding and extending the Anwar Sales Ecosystem.

@@ -18,6 +18,8 @@ function doGet(e) {
     return PotentialSiteHandler.doGet(e);
   } else if (formId === Config.FORMS.RETAILER) {
     return RetailerHandler.doGet(e);
+  } else if (formId === Config.FORMS.SR) {
+    return SRHandler.doGet(e);
   } else {
     // Default response
     return ContentService
@@ -38,6 +40,7 @@ function onFormSubmit(e) {
   var RETAILER_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('RETAILER_FORM_ID') : Config.FORMS.RETAILER;
   var SITE_UPDATE_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('SITE_UPDATE_FORM_ID') : Config.SITE_UPDATE_FORM_ID;
   var BD_LEAD_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('BD_LEAD_FORM_ID') : Config.FORMS.BD_LEAD;
+  var SR_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('SR_FORM_ID') : Config.FORMS.SR;
 
   if (formId === ENGINEER_FORM_ID) {
     EngineerHandler.onFormSubmit(e);
@@ -49,6 +52,8 @@ function onFormSubmit(e) {
     SiteUpdateHandler.onFormSubmit(e);
   } else if (formId === BD_LEAD_FORM_ID) {
     BDLeadHandler.onFormSubmit(e);
+  } else if (formId === SR_FORM_ID) {
+    SRHandler.onFormSubmit(e);
   } else {
     console.log('Unknown form ID: ' + formId);
   }
@@ -73,6 +78,9 @@ function onEdit(e) {
       break;
     case Config.SHEETS.BD_LEAD:
       BDLeadHandler.onEdit(e);
+      break;
+    case Config.SHEETS.SR:
+      SRHandler.onEdit(e);
       break;
     default:
       // Optional: handle other edits or log them

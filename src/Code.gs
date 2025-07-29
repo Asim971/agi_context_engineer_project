@@ -136,6 +136,27 @@ function routeOnEdit(e) {
   MainHandler.onEdit(e);
 }
 
+// Specific trigger functions for different form types
+function onRetailerFormSubmit(e) {
+  MainHandler.onFormSubmit(e);
+}
+
+function onPotentialSiteFormSubmit(e) {
+  MainHandler.onFormSubmit(e);
+}
+
+function onEngineerFormSubmit(e) {
+  MainHandler.onFormSubmit(e);
+}
+
+function onSiteUpdateFormSubmit(e) {
+  MainHandler.onFormSubmit(e);
+}
+
+function onBDLeadFormSubmit(e) {
+  MainHandler.onFormSubmit(e);
+}
+
 /**
  * Main web app entry point - handles GET requests
  * Routes to appropriate handlers based on form ID or parameters

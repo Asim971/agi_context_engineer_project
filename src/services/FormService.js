@@ -75,6 +75,21 @@ var FormService = (function() {
         { title: 'Email Address', type: FormApp.ItemType.TEXT, required: true },
       ],
     },
+    'Sales Representative': {
+      title: 'Anwar Sales Eco - Sales Representative Registration',
+      fields: [
+        { title: 'SR Name', type: FormApp.ItemType.TEXT, required: true },
+        { title: 'Line Manager', type: FormApp.ItemType.TEXT, required: true },
+        { title: 'Business Unit', type: FormApp.ItemType.LIST, choices: ['AIL', 'ACL'], required: true },
+        { title: 'Nation', type: FormApp.ItemType.LIST, choices: [], required: true },
+        { title: 'Division', type: FormApp.ItemType.LIST, choices: [], required: true },
+        { title: 'Zone', type: FormApp.ItemType.LIST, choices: [], required: true },
+        { title: 'Area', type: FormApp.ItemType.LIST, choices: [], required: true },
+        { title: 'Territory', type: FormApp.ItemType.LIST, choices: [], required: true },
+        { title: 'Phone Number', type: FormApp.ItemType.TEXT, required: true },
+        { title: 'Email Address', type: FormApp.ItemType.TEXT, required: true },
+      ],
+    },
     'Visit': {
       title: 'Anwar Sales Eco - Test Visit',
       fields: [
