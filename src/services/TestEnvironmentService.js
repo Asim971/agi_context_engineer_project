@@ -1,151 +1,136 @@
 /**
- * TestEnvironmentService.js
- * Manages the creation and setup of a dedicated test environment.
+ * @file TestEnvironmentService.js
+ * @description Manages the creation, setup, and teardown of a dedicated test environment.
+ * This service ensures that testing can be done in an isolated and reproducible manner.
+ * @version 2.0.0
  */
 
-var TestEnvironmentService = (function() {
-
-  var TEST_FOLDER_ID_KEY = 'testEnvironmentFolderId';
+class TestEnvironmentService extends BaseService {
+  constructor() {
+    super();
+    this.configService = ConfigService;
+    this.dbService = getGlobalDB();
+    this.testFolderIdKey = 'TEST_ENVIRONMENT_FOLDER_ID';
+    this.logger.info('TestEnvironmentService initialized');
+  }
 
   /**
-   * Sets up the test environment by creating a dedicated folder and setting up form triggers.
+   * Sets up the entire test environment.
+   * Creates a dedicated folder, a test spreadsheet, and sets necessary properties.
    */
-  function setupTestEnvironment() {
-    var folderId = PropertiesService.getScriptProperties().getProperty(TEST_FOLDER_ID_KEY);
-    if (folderId && DriveApp.getFolderById(folderId)) {
-      console.log('Test environment folder already exists: ' + folderId);
-    } else {
-      try {
-        var folder = DriveApp.createFolder('Anwar Sales Eco - Test Environment - ' + new Date().getTime());
-        folderId = folder.getId();
-        PropertiesService.getScriptProperties().setProperty(TEST_FOLDER_ID_KEY, folderId);
-        console.log('Test environment folder created: ' + folderId);
-      } catch (error) {
-        console.error('Failed to create test environment folder: ' + error.toString());
-        throw new Error('Failed to create test environment folder.');
-      }
-    }
-    
-    // Create test spreadsheet if it doesn't exist
-    var testSpreadsheetId = PropertiesService.getScriptProperties().getProperty('testSpreadsheetId');
-    if (!testSpreadsheetId) {
-      try {
-        var testSpreadsheet = SpreadsheetApp.create('Anwar Sales Eco - Test Spreadsheet - ' + new Date().getTime());
-        testSpreadsheetId = testSpreadsheet.getId();
-        
-        // Move the spreadsheet to the test folder
-        var file = DriveApp.getFileById(testSpreadsheetId);
-        var folder = DriveApp.getFolderById(folderId);
-        folder.addFile(file);
-        DriveApp.getRootFolder().removeFile(file);
-        
-        PropertiesService.getScriptProperties().setProperty('testSpreadsheetId', testSpreadsheetId);
-        console.log('Test spreadsheet created: ' + testSpreadsheetId);
-      } catch (error) {
-        console.error('Failed to create test spreadsheet: ' + error.toString());
-        throw new Error('Failed to create test spreadsheet.');
-      }
-    } else {
-      console.log('Test spreadsheet already exists: ' + testSpreadsheetId);
-    }
-    
-    setupTriggers();
+  setup() {
+    this.executeWithErrorHandlingSync(() => {
+      this.logger.info('Starting test environment setup...');
+      
+      const folderId = this._getOrCreateTestFolder();
+      const spreadsheetId = this._getOrCreateTestSpreadsheet(folderId);
+      
+      // Set the master test environment flag
+      this.configService.set('IS_TEST_ENVIRONMENT', 'true');
+      this.configService.set('TEST_SPREADSHEET_ID', spreadsheetId);
 
+      // Initialize the test database with the new spreadsheet
+      const testDb = new DatabaseService(true);
+      
+      // Initialize all required sheets with headers and validation
+      Object.values(Config.SHEETS).forEach(sheetName => {
+        this.logger.debug(`Initializing test sheet: ${sheetName}`);
+        testDb.getSheet(sheetName);
+      });
+
+      this.logger.info('Test environment setup completed successfully.', { folderId, spreadsheetId });
+      return { folderId, spreadsheetId };
+    }, null, 'setup');
+  }
+
+  /**
+   * Tears down the test environment by deleting the test folder and properties.
+   */
+  teardown() {
+    this.executeWithErrorHandlingSync(() => {
+      this.logger.warn('Starting test environment teardown...');
+      const folderId = this.configService.get(this.testFolderIdKey);
+
+      if (folderId) {
+        try {
+          const folder = DriveApp.getFolderById(folderId);
+          folder.setTrashed(true);
+          this.logger.info('Test environment folder moved to trash.', { folderId });
+        } catch (e) {
+          this.logger.error('Failed to trash test folder. It might have been deleted already.', { folderId, error: e.message });
+        }
+      }
+
+      // Clean up script properties
+      const properties = PropertiesService.getScriptProperties();
+      properties.deleteProperty('IS_TEST_ENVIRONMENT');
+      properties.deleteProperty('TEST_SPREADSHEET_ID');
+      properties.deleteProperty(this.testFolderIdKey);
+      
+      this.logger.info('Test environment properties have been cleared.');
+    }, null, 'teardown');
+  }
+
+  /**
+   * Gets or creates the main test folder in Google Drive.
+   * @private
+   * @returns {string} The ID of the test folder.
+   */
+  _getOrCreateTestFolder() {
+    let folderId = this.configService.get(this.testFolderIdKey);
+    if (folderId) {
+      try {
+        DriveApp.getFolderById(folderId); // Check if folder exists
+        this.logger.debug('Found existing test folder.', { folderId });
+        return folderId;
+      } catch (e) {
+        this.logger.warn('Test folder ID found in properties, but folder is missing. Creating a new one.', { folderId });
+      }
+    }
+
+    const folder = DriveApp.createFolder(`Anwar Sales Eco - Test Environment - ${new Date().getTime()}`);
+    folderId = folder.getId();
+    this.configService.set(this.testFolderIdKey, folderId);
+    this.logger.info('Created new test environment folder.', { folderId });
     return folderId;
   }
 
   /**
-   * Sets up all the form submit triggers.
+   * Gets or creates the test spreadsheet within the test folder.
+   * @private
+   * @param {string} folderId - The ID of the parent test folder.
+   * @returns {string} The ID of the test spreadsheet.
    */
-  function setupTriggers() {
-    var formConfigs = FormService.getFormConfigs(); // Assuming this method exists to get configs
-    var spreadsheetId = PropertiesService.getScriptProperties().getProperty('testSpreadsheetId');
-
-    Object.keys(formConfigs).forEach(function(formName) {
-      var formId = PropertiesService.getScriptProperties().getProperty('formId_' + formName);
-      if (!formId) {
-        var form = FormService.createForm(formName, spreadsheetId);
-        formId = form.getId();
-        FormService.storeFormId(formName, formId);
-      }
-    });
-
-    var formIds = FormService.getFormIds();
-    Object.keys(formIds).forEach(function(formType) {
-      var formId = formIds[formType];
-      if (formId) {
-        var triggerFunction;
-        switch (formType) {
-          case 'Retailer':
-            triggerFunction = 'onRetailerFormSubmit';
-            break;
-          case 'Potential Site':
-            triggerFunction = 'onPotentialSiteFormSubmit';
-            break;
-          case 'Engineer':
-            triggerFunction = 'onEngineerFormSubmit';
-            break;
-          case 'Site Update':
-            triggerFunction = 'onSiteUpdateFormSubmit';
-            break;
-          case 'Visit':
-            triggerFunction = 'onVisitFormSubmit';
-            break;
-          case 'BD Lead':
-            triggerFunction = 'onBDLeadFormSubmit';
-            break;
-          default:
-            Logger.log('No trigger function defined for form type: ' + formType);
-            return;
-        }
-        createFormSubmitTrigger(formId, triggerFunction);
-      }
-    });
-  }
-
-  /**
-   * Creates a trigger for a form submit event, avoiding duplicates.
-   * @param {string} formId The ID of the form.
-   * @param {string} functionName The name of the function to trigger.
-   */
-  function createFormSubmitTrigger(formId, functionName) {
-    // Delete existing triggers for the same function to avoid duplication
-    var allTriggers = ScriptApp.getProjectTriggers();
-    for (var i = 0; i < allTriggers.length; i++) {
-      if (allTriggers[i].getHandlerFunction() === functionName) {
-        ScriptApp.deleteTrigger(allTriggers[i]);
-        console.log('Removed existing trigger for: ' + functionName);
+  _getOrCreateTestSpreadsheet(folderId) {
+    let spreadsheetId = this.configService.get('TEST_SPREADSHEET_ID');
+    if (spreadsheetId) {
+      try {
+        SpreadsheetApp.openById(spreadsheetId); // Check if it exists
+        this.logger.debug('Found existing test spreadsheet.', { spreadsheetId });
+        return spreadsheetId;
+      } catch (e) {
+        this.logger.warn('Test spreadsheet ID found, but file is missing. Creating a new one.', { spreadsheetId });
       }
     }
-    // Create a new trigger
-    ScriptApp.newTrigger(functionName)
-      .forForm(formId)
-      .onFormSubmit()
-      .create();
-    console.log('Created new trigger for ' + functionName + ' on form ' + formId);
+
+    const spreadsheet = SpreadsheetApp.create(`Anwar Sales Eco - Test Spreadsheet - ${new Date().getTime()}`);
+    spreadsheetId = spreadsheet.getId();
+    
+    // Move the new spreadsheet to the test folder
+    const file = DriveApp.getFileById(spreadsheetId);
+    const folder = DriveApp.getFolderById(folderId);
+    folder.addFile(file);
+    DriveApp.getRootFolder().removeFile(file); // Remove from root to keep Drive clean
+
+    this.logger.info('Created new test spreadsheet.', { spreadsheetId });
+    return spreadsheetId;
   }
+}
 
-  /**
-   * Gets the ID of the test environment folder.
-   * @returns {string|null} The folder ID or null if not set.
-   */
-  function getTestEnvironmentFolderId() {
-    return PropertiesService.getScriptProperties().getProperty(TEST_FOLDER_ID_KEY);
-  }
+// --- Global Instance & Legacy Wrapper ---
+const testEnvironmentServiceInstance = new TestEnvironmentService();
 
-  /**
-   * Resets the test environment by deleting the folder ID from properties.
-   */
-  function resetTestEnvironment() {
-    PropertiesService.getScriptProperties().deleteProperty(TEST_FOLDER_ID_KEY);
-    console.log('Test environment has been reset.');
-  }
-
-  return {
-    setupTestEnvironment: setupTestEnvironment,
-    getTestEnvironmentFolderId: getTestEnvironmentFolderId,
-    resetTestEnvironment: resetTestEnvironment
-  };
-
-
-})();
+const TestEnvironmentServiceGlobal = {
+  setup: () => testEnvironmentServiceInstance.setup(),
+  teardown: () => testEnvironmentServiceInstance.teardown()
+};

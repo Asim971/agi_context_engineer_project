@@ -27,6 +27,18 @@ All AI-assisted development must incorporate context from:
 - **Security and Compliance**: Emphasize GDPR compliance, encryption, and role-based access in all security-related prompts
 - **Future-Ready Development**: Consider enhancement roadmap phases when implementing current features
 
+### Prompt Builder Integration
+- **Prompt Library Usage**: Reference <mcfile name="prompt-library.md" path=".agent-os/prompts/prompt-library.md"></mcfile> for standardized prompts
+- **Context Engineering**: Follow <mcfile name="context-engineering-framework.md" path=".agent-os/frameworks/context-engineering-framework.md"></mcfile> for context integration
+- **Agent Communication**: Use structured handoff templates for inter-agent communication
+- **Quality Validation**: Include prompt effectiveness metrics and validation criteria
+
+### Advanced Prompt Techniques
+- **Chain-of-Thought**: Break complex tasks into logical step-by-step reasoning
+- **Few-Shot Learning**: Provide relevant examples for complex implementation patterns
+- **Role-Based Prompting**: Specify agent roles and expertise areas for specialized tasks
+- **Context Injection**: Dynamically include relevant context based on task requirements
+
 ### Modern Development Practices
 - **ES6+ JavaScript**: Use modern JavaScript features (const/let, arrow functions, destructuring, async/await)
 - **Error Handling**: Implement comprehensive error handling with logging and recovery mechanisms

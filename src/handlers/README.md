@@ -1,52 +1,66 @@
 # Handlers Directory
 
-This directory contains event handlers and form submission processors for the Anwar Sales Ecosystem, managing the core business logic and data flow.
+This directory contains the event handlers for the Anwar Sales Management System. Each handler is responsible for processing specific events, such as Google Form submissions (`onFormSubmit`) or Google Sheet edits (`onEdit`).
 
-## Current Files
+## Architectural Pattern
 
-### `MainHandler.js`
-Main application handler that:
-- Manages overall application flow and coordination
-- Routes requests to appropriate specialized handlers
-- Handles cross-cutting concerns and middleware
-- Coordinates between different handlers and services
+All handlers follow a modern, class-based architecture and extend the `BaseService` class. This provides them with built-in structured logging, robust error handling, and access to core application services.
 
-### `BDLeadHandler.js`
-Business Development lead handler that:
-- Processes BD lead form submissions
-- Validates and sanitizes lead data
-- Implements lead qualification logic
-- Manages lead routing and assignment
+### Key Responsibilities:
+- **Event-Specific Logic**: Each handler contains the business logic for a specific form or sheet. For example, `EngineerHandler.js` processes new engineer registrations.
+- **Data Validation**: Handlers are responsible for the initial validation of incoming data, often using the `ValidationService`.
+- **Data Processing**: They transform and prepare data from the event object before passing it to the `DatabaseService`.
+- **Service Orchestration**: A handler orchestrates calls to various services, such as `DatabaseService` to store data and `WhatsAppService` to send notifications.
 
-### `CRMHandler.js`
-CRM operations handler that:
-- Manages CRM-related data processing
-- Handles customer relationship workflows
-- Processes CRM integrations and updates
-- Manages customer data lifecycle
+## Main Handler (`MainHandler.js`)
 
-## Task List - Phase 1: Foundation Modernization
+`MainHandler.js` acts as the central router for all incoming events from Google Apps Script triggers (`onFormSubmit`, `onEdit`).
 
-### High Priority Tasks
+- **Routing**: It inspects the event object (e.g., the form ID or sheet name) and uses a `serviceMap` to delegate the event to the appropriate handler instance.
+- **Single Entry Point**: This pattern ensures that all event processing starts from a single, manageable entry point, simplifying debugging and maintenance.
 
-#### TASK-HND-001: Modernize Handler Architecture
-- **Category**: Modernization
-- **Priority**: High
-- **Complexity**: Complex
-- **Phase 1 Alignment**: Modern JS | Service Architecture | Error Handling
-- **Description**: Refactor all handlers to use modern JavaScript patterns and service-oriented design
-- **Requirements**:
-  - Convert handlers to ES6+ class-based architecture
-  - Implement async/await for all asynchronous operations
-  - Add comprehensive error handling with try-catch blocks
-  - Create modular handler methods with clear interfaces
-  - Implement handler middleware and interceptors
-- **Acceptance Criteria**:
-  - [ ] ES6+ class implementation for all handlers
-  - [ ] Async/await pattern throughout handlers
-  - [ ] Comprehensive error handling and recovery
-  - [ ] Modular service architecture
-  - [ ] Middleware system implementation
+## Example Handler (`EngineerHandler.js`)
+
+```javascript
+class EngineerHandler extends BaseService {
+  constructor() {
+    super();
+    this.db = getGlobalDB();
+    // Specific validation rules for the engineer form
+    this.validationService = new ValidationService(Config.VALIDATION_RULES.ENGINEER);
+  }
+
+  /**
+   * Handles the form submission event for engineer registration.
+   * @param {GoogleAppsScript.Events.FormsOnFormSubmit} e The event object.
+   */
+  onFormSubmit(e) {
+    this.executeWithErrorHandling(() => {
+      const { data, validationResult } = this._extractAndValidateData(e);
+
+      if (!validationResult.isValid) {
+        // Handle validation errors
+        return;
+      }
+      
+      // Store the validated data in the database
+      this.db.insertRecord(Config.SHEETS.ENGINEER, data);
+
+      // Send a confirmation notification
+      const message = `Welcome, ${data.Name}! Your registration is pending approval.`;
+      this.whatsAppService.sendMessage(data.Phone, message);
+    });
+  }
+
+  /**
+   * Handles the onEdit event for the Engineer sheet, typically for approvals.
+   * @param {GoogleAppsScript.Events.SheetsOnEdit} e The event object.
+   */
+  onEdit(e) {
+    // Logic to handle status changes, like 'Approved'
+  }
+}
+```
 
 #### TASK-HND-002: Enhanced Error Handling and Validation
 - **Category**: Enhancement

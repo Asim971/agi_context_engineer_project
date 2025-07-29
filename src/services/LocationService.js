@@ -1,92 +1,124 @@
-const LocationService = (() => {
-  let dbService = null;
+/**
+ * @file LocationService.js
+ * @description Service for handling location-based data, including demarcation and administrative settings.
+ * It provides a structured interface to query geographical and organizational hierarchies.
+ * @version 2.0.0
+ */
+
+class LocationService extends BaseService {
+  constructor() {
+    super();
+    this.db = getGlobalDB();
+    this.demarcationSheet = Config.SHEETS.DEMARCATION;
+    this.adminSettingsSheet = Config.SHEETS.ADMINISTRATIVE_SETTINGS;
+    this.logger.info('LocationService initialized');
+  }
+
+  // --- Public API for Hierarchy Retrieval ---
+
+  getDistricts() { 
+    return this._getUniqueColumnValues(this.demarcationSheet, 'District');
+  }
   
-  const getDbService = () => {
-    if (!dbService) {
-      dbService = new DatabaseService();
-    }
-    return dbService;
-  };
+  getUpazilas() { 
+    return this._getUniqueColumnValues(this.demarcationSheet, 'Uujila');
+  }
+  
+  getBazaars() { 
+    return this._getUniqueColumnValues(this.demarcationSheet, 'Bazaar');
+  }
 
-  // --- Demarcation Functions ---
+  getTerritories() { 
+    return this._getUniqueColumnValues(this.adminSettingsSheet, 'Territory');
+  }
+  
+  getAreas() { 
+    return this._getUniqueColumnValues(this.adminSettingsSheet, 'Area');
+  }
+  
+  getZones() { 
+    return this._getUniqueColumnValues(this.adminSettingsSheet, 'Zone');
+  }
+  
+  getDivisions() { 
+    return this._getUniqueColumnValues(this.adminSettingsSheet, 'Division');
+  }
+  
+  getCountries() { 
+    return this._getUniqueColumnValues(this.adminSettingsSheet, 'Country');
+  }
 
-  const addDemarcation = (data) => {
-    return getDbService().insertRecord(Config.SHEETS.DEMARCATION, data);
-  };
+  // --- Generic CRUD Methods (can be exposed if needed) ---
 
-  const getDemarcations = () => {
-    return getDbService().getAllRecords(Config.SHEETS.DEMARCATION);
-  };
+  /**
+   * Finds records in the demarcation sheet.
+   * @param {Object} criteria - Key-value pairs to search for.
+   * @returns {Object[]} An array of matching demarcation records.
+   */
+  findDemarcation(criteria) {
+    return this.executeWithErrorHandlingSync(
+      () => this.db.findRecords(this.demarcationSheet, criteria),
+      { criteria },
+      'findDemarcation'
+    );
+  }
 
-  const updateDemarcation = (rowNumber, data) => {
-    return getDbService().updateRecord(Config.SHEETS.DEMARCATION, rowNumber, data);
-  };
+  /**
+   * Finds records in the administrative settings sheet.
+   * @param {Object} criteria - Key-value pairs to search for.
+   * @returns {Object[]} An array of matching admin setting records.
+   */
+  findAdminSetting(criteria) {
+    return this.executeWithErrorHandlingSync(
+      () => this.db.findRecords(this.adminSettingsSheet, criteria),
+      { criteria },
+      'findAdminSetting'
+    );
+  }
 
-  const findDemarcation = (criteria) => {
-    return getDbService().findRecords(Config.SHEETS.DEMARCATION, criteria);
-  };
+  // --- Private Helper Methods ---
 
-  // --- Administrative Settings Functions ---
-
-  const addAdminSetting = (data) => {
-    return getDbService().insertRecord(Config.SHEETS.ADMINISTRATIVE_SETTINGS, data);
-  };
-
-  const getAdminSettings = () => {
-    return getDbService().getAllRecords(Config.SHEETS.ADMINISTRATIVE_SETTINGS);
-  };
-
-  const updateAdminSetting = (rowNumber, data) => {
-    return getDbService().updateRecord(Config.SHEETS.ADMINISTRATIVE_SETTINGS, rowNumber, data);
-  };
-
-  const findAdminSetting = (criteria) => {
-    return getDbService().findRecords(Config.SHEETS.ADMINISTRATIVE_SETTINGS, criteria);
-  };
-
-  // --- Hierarchy Retrieval Functions ---
-
-  const getUniqueColumnValues = (sheetName, columnName) => {
-    try {
-      const records = getDbService().getAllRecords(sheetName);
-      const values = records.map(record => record[columnName]);
-      const uniqueValues = [...new Set(values)].filter(Boolean); // Remove empty values and get unique
+  /**
+   * Retrieves unique, non-empty values from a specific column in a sheet.
+   * @private
+   * @param {string} sheetName - The name of the sheet to query.
+   * @param {string} columnName - The name of the column to get unique values from.
+   * @returns {string[]} An array of unique string values.
+   */
+  _getUniqueColumnValues(sheetName, columnName) {
+    return this.executeWithErrorHandlingSync(() => {
+      const records = this.db.getAllRecords(sheetName);
+      if (!records || records.length === 0) {
+        this.logger.warn('No records found in sheet', { sheetName });
+        return ['No data available'];
+      }
       
-      // Return fallback if no values found
-      return uniqueValues.length > 0 ? uniqueValues : ['No data available'];
-    } catch (error) {
-      console.error(`Error getting unique values from ${sheetName}.${columnName}:`, error);
-      return ['No data available'];
-    }
-  };
+      const values = records.map(record => record[columnName]);
+      const uniqueValues = [...new Set(values)].filter(Boolean); // Filter out null/undefined/empty strings
 
-  const getDistricts = () => getUniqueColumnValues(Config.SHEETS.DEMARCATION, 'District');
-  const getUpazilas = () => getUniqueColumnValues(Config.SHEETS.DEMARCATION, 'Uujila');
-  const getBazaars = () => getUniqueColumnValues(Config.SHEETS.DEMARCATION, 'Bazaar');
+      if (uniqueValues.length === 0) {
+        this.logger.debug('No unique values found for column', { sheetName, columnName });
+        return ['No data available'];
+      }
 
-  const getTerritories = () => getUniqueColumnValues(Config.SHEETS.ADMINISTRATIVE_SETTINGS, 'Territory');
-  const getAreas = () => getUniqueColumnValues(Config.SHEETS.ADMINISTRATIVE_SETTINGS, 'Area');
-  const getZones = () => getUniqueColumnValues(Config.SHEETS.ADMINISTRATIVE_SETTINGS, 'Zone');
-  const getDivisions = () => getUniqueColumnValues(Config.SHEETS.ADMINISTRATIVE_SETTINGS, 'Division');
-  const getCountries = () => getUniqueColumnValues(Config.SHEETS.ADMINISTRATIVE_SETTINGS, 'Country');
+      return uniqueValues;
+    }, { sheetName, columnName }, '_getUniqueColumnValues');
+  }
+}
 
+// --- Global Instance & Legacy Wrapper ---
+const locationServiceInstance = new LocationService();
 
-  return {
-    addDemarcation,
-    getDemarcations,
-    updateDemarcation,
-    findDemarcation,
-    addAdminSetting,
-    getAdminSettings,
-    updateAdminSetting,
-    findAdminSetting,
-    getDistricts,
-    getUpazilas,
-    getBazaars,
-    getTerritories,
-    getAreas,
-    getZones,
-    getDivisions,
-    getCountries
-  };
-})();
+const LocationServiceGlobal = {
+  getDistricts: () => locationServiceInstance.getDistricts(),
+  getUpazilas: () => locationServiceInstance.getUpazilas(),
+  getBazaars: () => locationServiceInstance.getBazaars(),
+  getTerritories: () => locationServiceInstance.getTerritories(),
+  getAreas: () => locationServiceInstance.getAreas(),
+  getZones: () => locationServiceInstance.getZones(),
+  getDivisions: () => locationServiceInstance.getDivisions(),
+  getCountries: () => locationServiceInstance.getCountries(),
+  findDemarcation: (criteria) => locationServiceInstance.findDemarcation(criteria),
+  findAdminSetting: (criteria) => locationServiceInstance.findAdminSetting(criteria)
+  // Add other legacy methods here if they were directly exposed and used elsewhere
+};

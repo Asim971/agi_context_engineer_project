@@ -1,24 +1,16 @@
 {
   "scriptId": "1VDfwFbCXXwyyil5C5jrMXQBpx54GCl6nFfYa9ckh9t6XUg2V0ToYKZnS",
   "rootDir": "src",
-  "filePushOrder": [
-    "config/Config.js",
-    "services/TestEnvironmentService.js",
-    "database/DatabaseService.js",
-    "services/WhatsAppService.js",
-    "services/MigrationService.js",
-    "services/FormService.js",
-    "services/IdService.js",
-    "handlers/EngineerHandler.js",
-    "handlers/PotentialSiteHandler.js",
-    "handlers/RetailerHandler.js",
-    "handlers/BDLeadHandler.js",
-    "handlers/CRMHandler.js",
-    "handlers/SiteUpdateHandler.js",
-    "handlers/MainHandler.js",
-    "legacy/InitializeSheets.js",
-    "legacy/SetupTriggers.js",
-    "Code.gs",
-    "appsscript.json"
-  ]
+  "projectId": "304018191001",
+  "scriptExtensions": [
+    ".js",
+    ".gs"
+  ],
+  "htmlExtensions": [
+    ".html"
+  ],
+  "jsonExtensions": [
+    ".json"
+  ],
+  "filePushOrder": []
 }

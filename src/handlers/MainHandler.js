@@ -1,102 +1,142 @@
 /**
- * MainHandler.js
- * Entry points and routing for unified Anwar Sales Ecosystem
- * Consolidates all entry points from legacy and unified projects
+ * @file MainHandler.js
+ * @description Main entry point and routing logic for the Anwar Sales Ecosystem.
+ * This service routes incoming web requests, form submissions, and sheet edits
+ * to the appropriate handler services. It uses a service-oriented architecture
+ * and extends BaseService for centralized logging and error handling.
+ * @version 2.0.0
  */
 
+class MainHandlerService extends BaseService {
+  constructor() {
+    super();
+    // Service mapping for form submissions and edits
+    this.serviceMap = {
+      [Config.FORMS.ENGINEER]: engineerHandlerService,
+      [Config.FORMS.POTENTIAL_SITE]: potentialSiteHandlerService,
+      [Config.FORMS.RETAILER]: retailerHandlerService,
+      [Config.FORMS.SITE_UPDATE]: siteUpdateHandlerService, // Assuming this will be created
+      [Config.FORMS.BD_LEAD]: bdLeadHandlerService,       // Assuming this will be created
+      [Config.FORMS.SR]: srHandlerService,               // Assuming this will be created
+      
+      // Mapping for sheet names to services
+      [Config.SHEETS.ENGINEER]: engineerHandlerService,
+      [Config.SHEETS.POTENTIAL_SITE]: potentialSiteHandlerService,
+      [Config.SHEETS.RETAILER]: retailerHandlerService,
+      [Config.SHEETS.BD_LEAD]: bdLeadHandlerService,
+      [Config.SHEETS.SR]: srHandlerService
+    };
+    this.logger.info('MainHandlerService initialized');
+  }
+
+  /**
+   * Main entry point for all web requests (doGet).
+   * @param {Object} e - The event parameter from the Apps Script trigger.
+   * @returns {ContentService.TextOutput} A text or JSON response.
+   */
+  doGet(e) {
+    return this.executeWithErrorHandling(() => {
+      const formId = e.parameter?.formId || '';
+      const service = this.serviceMap[formId];
+
+      if (service && typeof service.doGet === 'function') {
+        this.logger.info('Routing GET request', { formId });
+        return service.doGet(e);
+      }
+      
+      this.logger.info('No specific GET handler found, returning default response', { formId });
+      return ContentService
+        .createTextOutput('Anwar Sales Ecosystem - Unified API Endpoint')
+        .setMimeType(ContentService.MimeType.JSON);
+    }, { event: e }, 'doGet');
+  }
+
+  /**
+   * Handles all incoming form submissions.
+   * @param {Object} e - The event parameter from the Apps Script trigger.
+   */
+  onFormSubmit(e) {
+    this.executeWithErrorHandling(() => {
+      const formId = e.source.getId();
+      const service = this.serviceMap[formId];
+
+      if (service && typeof service.onFormSubmit === 'function') {
+        this.logger.info('Routing form submission', { formId });
+        service.onFormSubmit(e);
+      } else {
+        throw new AppScriptError('ROUTING_FORM_NOT_FOUND', `No handler configured for form ID: ${formId}`, { formId });
+      }
+    }, { event: e }, 'onFormSubmit');
+  }
+
+  /**
+   * Handles all incoming sheet edits.
+   * @param {Object} e - The event parameter from the Apps Script trigger.
+   */
+  onEdit(e) {
+    this.executeWithErrorHandling(() => {
+      const sheetName = e.range.getSheet().getName();
+      const service = this.serviceMap[sheetName];
+
+      if (service && typeof service.onEdit === 'function') {
+        this.logger.info('Routing sheet edit', { sheetName });
+        service.onEdit(e);
+      } else {
+        this.logger.debug('No specific edit handler for sheet', { sheetName });
+      }
+    }, { event: e }, 'onEdit');
+  }
+}
+
+// Create a single global instance of the MainHandlerService
+const mainHandlerService = new MainHandlerService();
+
+// --- Legacy Wrapper Functions ---
+// These functions provide backward compatibility for triggers and other scripts
+// that might still call the old function names.
+
 /**
- * Main entry point for web requests
+ * @deprecated since v2.0.0. Use mainHandlerService.doGet(e)
  */
 function doGet(e) {
-  var params = e.parameter || {};
-  var formId = params.formId || '';
-
-  // Route based on form ID
-  if (formId === Config.FORMS.ENGINEER) {
-    return EngineerHandler.doGet(e);
-  } else if (formId === Config.FORMS.POTENTIAL_SITE) {
-    return PotentialSiteHandler.doGet(e);
-  } else if (formId === Config.FORMS.RETAILER) {
-    return RetailerHandler.doGet(e);
-  } else if (formId === Config.FORMS.SR) {
-    return SRHandler.doGet(e);
-  } else {
-    // Default response
-    return ContentService
-      .createTextOutput('Anwar Sales Ecosystem - Unified Google Apps Script')
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
+  return mainHandlerService.doGet(e);
 }
 
 /**
- * Form submission handler
+ * @deprecated since v2.0.0. Use mainHandlerService.onFormSubmit(e)
  */
 function onFormSubmit(e) {
-  var formId = e.source.getId();
-
-  // Get form IDs, respecting test environment
-  var ENGINEER_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('ENGINEER_FORM_ID') : Config.FORMS.ENGINEER;
-  var POTENTIAL_SITE_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('POTENTIAL_SITE_FORM_ID') : Config.FORMS.POTENTIAL_SITE;
-  var RETAILER_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('RETAILER_FORM_ID') : Config.FORMS.RETAILER;
-  var SITE_UPDATE_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('SITE_UPDATE_FORM_ID') : Config.SITE_UPDATE_FORM_ID;
-  var BD_LEAD_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('BD_LEAD_FORM_ID') : Config.FORMS.BD_LEAD;
-  var SR_FORM_ID = Config.IS_TEST_ENVIRONMENT ? PropertiesService.getScriptProperties().getProperty('SR_FORM_ID') : Config.FORMS.SR;
-
-  if (formId === ENGINEER_FORM_ID) {
-    EngineerHandler.onFormSubmit(e);
-  } else if (formId === POTENTIAL_SITE_FORM_ID) {
-    PotentialSiteHandler.onFormSubmit(e);
-  } else if (formId === RETAILER_FORM_ID) {
-    RetailerHandler.onFormSubmit(e);
-  } else if (formId === SITE_UPDATE_FORM_ID) {
-    SiteUpdateHandler.onFormSubmit(e);
-  } else if (formId === BD_LEAD_FORM_ID) {
-    BDLeadHandler.onFormSubmit(e);
-  } else if (formId === SR_FORM_ID) {
-    SRHandler.onFormSubmit(e);
-  } else {
-    console.log('Unknown form ID: ' + formId);
-  }
+  mainHandlerService.onFormSubmit(e);
 }
 
 /**
- * Edit trigger handler
+ * @deprecated since v2.0.0. Use mainHandlerService.onEdit(e)
  */
 function onEdit(e) {
-  var sheetName = e.range.getSheet().getName();
+  mainHandlerService.onEdit(e);
+}
 
-  // Route based on sheet name
-  switch (sheetName) {
-    case Config.SHEETS.ENGINEER:
-      EngineerHandler.onEdit(e);
-      break;
-    case Config.SHEETS.POTENTIAL_SITE:
-      PotentialSiteHandler.onEdit(e);
-      break;
-    case Config.SHEETS.RETAILER:
-      RetailerHandler.onEdit(e);
-      break;
-    case Config.SHEETS.BD_LEAD:
-      BDLeadHandler.onEdit(e);
-      break;
-    case Config.SHEETS.SR:
-      SRHandler.onEdit(e);
-      break;
-    default:
-      // Optional: handle other edits or log them
-      break;
+/**
+ * Time-based trigger for legacy functionality.
+ * This can be refactored into a dedicated service if needed.
+ * @deprecated
+ */
+function initializeNewSheets() {
+  // This function call should be updated if LegacyInitializer is refactored.
+  // For now, it's wrapped to ensure it benefits from any future top-level error handling.
+  try {
+    LegacyInitializer.initializeNewSheets();
+  } catch (error) {
+    // If a global error handler is available, use it.
+    // For now, logging to the console.
+    console.error('Error during legacy sheet initialization:', error);
   }
 }
 
 /**
- * Time-based trigger for legacy functionality
- */
-function initializeNewSheets() {
-  LegacyInitializer.initializeNewSheets();
-}
-
-/**
- * Setup function for the production environment
+ * Setup function for the production environment.
+ * This should be migrated to a dedicated SetupService or DeploymentService.
+ * @deprecated
  */
 function setupProductionEnvironment() {
   Config.IS_TEST_ENVIRONMENT = false;

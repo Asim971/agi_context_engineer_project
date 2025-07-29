@@ -96,3 +96,23 @@ var Config = {
     ]
   }
 };
+
+/**
+ * Ensure Config is globally accessible in Google Apps Script
+ * Critical for service locator pattern to work correctly
+ */
+if (typeof globalThis !== 'undefined') {
+  globalThis.Config = Config;
+}
+
+// Also ensure it's available on the global scope for Google Apps Script
+if (typeof global !== 'undefined') {
+  global.Config = Config;
+}
+
+// Additional compatibility for Google Apps Script V8 runtime
+if (typeof window !== 'undefined') {
+  window.Config = Config;
+}
+
+console.log('✅ Config loaded and registered in global scope');

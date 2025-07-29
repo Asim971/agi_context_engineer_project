@@ -1,51 +1,70 @@
 /**
- * @fileoverview Service for generating unique IDs.
+ * @file IdService.js
+ * @description Service for generating unique, sequential, and concurrency-safe IDs.
+ * It uses a dedicated tracking sheet and a lock to prevent race conditions.
+ * @version 2.0.0
  */
 
-const IdService = (function() {
-  const ID_TRACKING_SHEET = Config.SHEETS.ID_TRACKING;
-
-  /**
-   * Generates the next unique ID for a given form type.
-   * @param {string} formType - The type of the form (e.g., 'Engineer', 'Retailer').
-   * @returns {string} The new unique ID.
-   */
-  function getNextId(formType) {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ID_TRACKING_SHEET);
-    if (!sheet) {
-      throw new Error(`Sheet "${ID_TRACKING_SHEET}" not found.`);
-    }
-
-    const data = sheet.getDataRange().getValues();
-    const headers = data.shift();
-    const formTypeIndex = headers.indexOf('Form Type');
-    const prefixIndex = headers.indexOf('Prefix');
-    const lastIdIndex = headers.indexOf('Last ID');
-
-    if (formTypeIndex === -1 || prefixIndex === -1 || lastIdIndex === -1) {
-      throw new Error('ID Tracking sheet is missing required columns.');
-    }
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i][formTypeIndex] === formType) {
-        const prefix = data[i][prefixIndex];
-        let lastId = data[i][lastIdIndex];
-        
-        if (typeof lastId !== 'number') {
-            lastId = 0;
-        }
-
-        const newId = lastId + 1;
-        sheet.getRange(i + 2, lastIdIndex + 1).setValue(newId);
-        
-        return `${prefix}${('0000' + newId).slice(-4)}`;
-      }
-    }
-
-    throw new Error(`Form type "${formType}" not found in ID Tracking sheet.`);
+class IdService extends BaseService {
+  constructor() {
+    super();
+    this.idTrackingSheet = Config.SHEETS.ID_TRACKING;
+    this.db = getGlobalDB();
+    this.logger.info('IdService initialized');
   }
 
-  return {
-    getNextId: getNextId
-  };
-})();
+  /**
+   * Generates the next unique ID for a given entity type in a concurrency-safe manner.
+   * @param {string} entityType - The type of entity (e.g., 'Engineer', 'Retailer').
+   * @returns {string} The new unique ID (e.g., 'EN0001').
+   */
+  getNextId(entityType) {
+    return this.executeWithErrorHandlingSync(() => {
+      const lock = LockService.getScriptLock();
+      const lockAcquired = lock.tryLock(15000); // Wait for 15 seconds
+
+      if (!lockAcquired) {
+        throw new AppScriptError('ID_GENERATION_LOCK_TIMEOUT', `Could not acquire lock for ID generation for entity: ${entityType}`);
+      }
+
+      this.logger.debug('Lock acquired for ID generation', { entityType });
+
+      try {
+        const trackingData = this.db.findRecords(this.idTrackingSheet, { 'Form Type': entityType });
+
+        if (!trackingData || trackingData.length === 0) {
+          throw new AppScriptError('CONFIG_ENTITY_TYPE_NOT_FOUND', `Entity type "${entityType}" not found in ID Tracking sheet.`);
+        }
+
+        const record = trackingData[0];
+        const prefix = record['Prefix'];
+        let lastId = parseInt(record['Last ID'], 10) || 0;
+        
+        const newIdNumber = lastId + 1;
+        
+        // Update the tracking sheet with the new last ID
+        const updated = this.db.updateRecord(this.idTrackingSheet, 'Form Type', entityType, { 'Last ID': newIdNumber });
+
+        if (!updated) {
+            throw new AppScriptError('ID_UPDATE_FAILED', `Failed to update the last ID for entity: ${entityType}`);
+        }
+
+        const newId = `${prefix}${('0000' + newIdNumber).slice(-4)}`;
+        this.logger.info('New ID generated successfully', { entityType, newId });
+        
+        return newId;
+
+      } finally {
+        lock.releaseLock();
+        this.logger.debug('Lock released for ID generation', { entityType });
+      }
+    }, { entityType }, 'getNextId');
+  }
+}
+
+// --- Global Instance & Legacy Wrapper ---
+const idServiceInstance = new IdService();
+
+const IdServiceGlobal = {
+  getNextId: (entityType) => idServiceInstance.getNextId(entityType)
+};

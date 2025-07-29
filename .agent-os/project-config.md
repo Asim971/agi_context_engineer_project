@@ -1,21 +1,28 @@
-# Anwar Sales Ecosystem - Agent OS Configuration
+# Anwar Sales Management System - Agent OS Configuration
 
 ## Project Overview
-The Anwar Sales Ecosystem is a comprehensive sales management platform built on Google Apps Script, integrating Google Workspace services with WhatsApp API for streamlined sales operations.
+The Anwar Sales Management System is a comprehensive sales ecosystem built on Google Apps Script, integrating Google Workspace services with WhatsApp Business API for streamlined registration, approval, and notification workflows.
 
 ## Agent OS Structure
 
 ### Core Configuration Files
-- **Mission & Goals**: <mcfile name="mission.md" path="e:\Anwar_sales_eco\.agent-os\product\mission.md"></mcfile>
-- **Technical Specifications**: <mcfile name="sales-eco-spec.md" path="e:\Anwar_sales_eco\.agent-os\projects\sales-eco-spec.md"></mcfile>
-- **Development Standards**: <mcfile name="code-standards.md" path="e:\Anwar_sales_eco\.agent-os\code-standards.md"></mcfile>
-- **AI Guidelines**: <mcfile name="ai-guidelines.md" path="e:\Anwar_sales_eco\.agent-os\ai-guidelines.md"></mcfile>
+- **Mission & Goals**: <mcfile name="mission.md" path=".agent-os/product/mission.md"></mcfile>
+- **Technical Specifications**: <mcfile name="sales-eco-spec.md" path=".agent-os/projects/sales-eco-spec.md"></mcfile>
+- **Development Standards**: <mcfile name="code-standards.md" path=".agent-os/code-standards.md"></mcfile>
+- **AI Guidelines**: <mcfile name="ai-guidelines.md" path=".agent-os/ai-guidelines.md"></mcfile>
 
 ### Agent Configurations
-- **Task Manager Agent**: <mcfile name="task-manager-agent.md" path="e:\Anwar_sales_eco\.agent-os\agents\task-manager-agent.md"></mcfile>
+- **Prompt Builder Agent**: <mcfile name="prompt-builder-agent.md" path=".agent-os/agents/prompt-builder-agent.md"></mcfile>
+- **Requirements Analysis Agent**: <mcfile name="requirements-analysis-agent.md" path=".agent-os/agents/requirements-analysis-agent.md"></mcfile>
+- **Architecture Design Agent**: <mcfile name="architecture-design-agent.md" path=".agent-os/agents/architecture-design-agent.md"></mcfile>
+- **Task Manager Agent**: <mcfile name="task-manager-agent.md" path=".agent-os/agents/task-manager-agent.md"></mcfile>
+
+### Prompt Engineering Framework
+- **Prompt Library**: <mcfile name="prompt-library.md" path=".agent-os/prompts/prompt-library.md"></mcfile>
+- **Context Engineering**: <mcfile name="context-engineering-framework.md" path=".agent-os/frameworks/context-engineering-framework.md"></mcfile>
 
 ### Roadmap & Planning
-- **Enhancement Roadmap**: <mcfile name="enhancement-roadmap.md" path="e:\Anwar_sales_eco\.agent-os\roadmap\enhancement-roadmap.md"></mcfile>
+- **Enhancement Roadmap**: <mcfile name="enhancement-roadmap.md" path=".agent-os/roadmap/enhancement-roadmap.md"></mcfile>
 
 ## Current System Architecture
 

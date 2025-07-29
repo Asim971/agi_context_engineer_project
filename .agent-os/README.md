@@ -1,53 +1,78 @@
-# Agent OS Configuration - Anwar Sales Ecosystem
+# Agent OS Configuration - Anwar Sales Management System
 
 ## Overview
-This directory contains the complete Agent OS configuration for the Anwar Sales Ecosystem, providing AI agents with comprehensive guidelines, standards, and specifications for development and maintenance.
+This directory contains the complete Agent OS configuration for the Anwar Sales Management System, providing AI agents with comprehensive guidelines, standards, and specifications for development and maintenance. The configuration supports the Prompt Builder Agent framework and agentic workflow orchestration.
 
 ## 🎯 Quick Start
 
 ### For AI Agents
-1. **Start Here**: <mcfile name="project-config.md" path="e:\Anwar_sales_eco\.agent-os\project-config.md"></mcfile> - Complete project overview
-2. **Mission & Goals**: <mcfile name="mission.md" path="e:\Anwar_sales_eco\.agent-os\product\mission.md"></mcfile> - Project mission and objectives
-3. **Development Guidelines**: <mcfile name="ai-guidelines.md" path="e:\Anwar_sales_eco\.agent-os\ai-guidelines.md"></mcfile> - AI-specific development guidelines
-4. **Code Standards**: <mcfile name="code-standards.md" path="e:\Anwar_sales_eco\.agent-os\code-standards.md"></mcfile> - Coding standards and best practices
+1. **Start Here**: <mcfile name="project-config.md" path=".agent-os/project-config.md"></mcfile> - Complete project overview
+2. **Mission & Goals**: <mcfile name="mission.md" path=".agent-os/product/mission.md"></mcfile> - Project mission and objectives
+3. **Development Guidelines**: <mcfile name="ai-guidelines.md" path=".agent-os/ai-guidelines.md"></mcfile> - AI-specific development guidelines
+4. **Code Standards**: <mcfile name="code-standards.md" path=".agent-os/code-standards.md"></mcfile> - Coding standards and best practices
+5. **Prompt Library**: <mcfile name="prompt-library.md" path=".agent-os/prompts/prompt-library.md"></mcfile> - Comprehensive prompt engineering resources
 
 ### For Developers
-1. **Technical Specs**: <mcfile name="sales-eco-spec.md" path="e:\Anwar_sales_eco\.agent-os\projects\sales-eco-spec.md"></mcfile> - Complete technical specifications
-2. **Enhancement Roadmap**: <mcfile name="enhancement-roadmap.md" path="e:\Anwar_sales_eco\.agent-os\roadmap\enhancement-roadmap.md"></mcfile> - Future development plans
-3. **Task Management**: <mcfile name="task-manager-agent.md" path="e:\Anwar_sales_eco\.agent-os\agents\task-manager-agent.md"></mcfile> - Task management guidelines
+1. **Technical Specs**: <mcfile name="sales-eco-spec.md" path=".agent-os/projects/sales-eco-spec.md"></mcfile> - Complete technical specifications
+2. **Enhancement Roadmap**: <mcfile name="enhancement-roadmap.md" path=".agent-os/roadmap/enhancement-roadmap.md"></mcfile> - Future development plans
+3. **Agent Directory**: <mcfile name="agents/" path=".agent-os/agents/"></mcfile> - All specialized agent configurations
+
+### For Prompt Engineering
+1. **Prompt Builder Agent**: <mcfile name="prompt-builder-agent.md" path=".agent-os/agents/prompt-builder-agent.md"></mcfile> - Core prompt engineering agent
+2. **Context Engineering**: <mcfile name="context-engineering-framework.md" path=".agent-os/frameworks/context-engineering-framework.md"></mcfile> - Context management framework
+3. **Quality Templates**: <mcfile name="quality-templates.md" path=".agent-os/templates/quality-templates.md"></mcfile> - Quality assurance templates
 
 ## 📁 Directory Structure
 
 ```
 .agent-os/
-├── README.md                    # This file - main entry point
-├── project-config.md            # Complete project configuration
-├── ai-guidelines.md             # AI development guidelines
-├── code-standards.md            # Coding standards and best practices
+├── README.md                           # This file - main entry point
+├── project-config.md                   # Complete project configuration
+├── ai-guidelines.md                    # AI development guidelines
+├── code-standards.md                   # Coding standards and best practices
 ├── product/
-│   └── mission.md              # Project mission and goals
+│   └── mission.md                     # Project mission and goals
 ├── projects/
-│   └── sales-eco-spec.md       # Technical specifications
+│   └── sales-eco-spec.md              # Technical specifications
 ├── agents/
-│   └── task-manager-agent.md   # Task Manager Agent configuration
+│   ├── prompt-builder-agent.md        # Core prompt engineering agent
+│   ├── requirements-analysis-agent.md # Requirements gathering and analysis
+│   ├── architecture-design-agent.md   # System architecture and design
+│   └── task-manager-agent.md          # Task management and coordination
+├── prompts/
+│   └── prompt-library.md              # Comprehensive prompt collection
+├── frameworks/
+│   └── context-engineering-framework.md # Context management framework
 ├── roadmap/
-│   └── enhancement-roadmap.md  # Future enhancement roadmap
+│   └── enhancement-roadmap.md         # Future enhancement roadmap
 └── templates/
-    └── task-analysis-prompt.md # Task analysis template
+    └── task-analysis-prompt.md        # Task analysis template
 ```
 
 ## 🎯 Core Components
 
 ### 1. Project Foundation
-- **<mcfile name="project-config.md" path="e:\Anwar_sales_eco\.agent-os\project-config.md"></mcfile>**: Central configuration and overview
-- **<mcfile name="mission.md" path="e:\Anwar_sales_eco\.agent-os\product\mission.md"></mcfile>**: Mission, goals, and business objectives
-- **<mcfile name="sales-eco-spec.md" path="e:\Anwar_sales_eco\.agent-os\projects\sales-eco-spec.md"></mcfile>**: Complete technical specifications
+- **<mcfile name="project-config.md" path=".agent-os/project-config.md"></mcfile>**: Central configuration and overview
+- **<mcfile name="mission.md" path=".agent-os/product/mission.md"></mcfile>**: Mission, goals, and business objectives
+- **<mcfile name="sales-eco-spec.md" path=".agent-os/projects/sales-eco-spec.md"></mcfile>**: Complete technical specifications
 
 ### 2. Development Standards
-- **<mcfile name="code-standards.md" path="e:\Anwar_sales_eco\.agent-os\code-standards.md"></mcfile>**: Modern JavaScript standards, security, and best practices
-- **<mcfile name="ai-guidelines.md" path="e:\Anwar_sales_eco\.agent-os\ai-guidelines.md"></mcfile>**: AI-specific development guidelines and integration
+- **<mcfile name="code-standards.md" path=".agent-os/code-standards.md"></mcfile>**: Modern JavaScript standards, security, and best practices
+- **<mcfile name="ai-guidelines.md" path=".agent-os/ai-guidelines.md"></mcfile>**: AI-specific development guidelines and integration
 
 ### 3. Agent Configurations
+- **<mcfile name="prompt-builder-agent.md" path=".agent-os/agents/prompt-builder-agent.md"></mcfile>**: Core prompt engineering and optimization
+- **<mcfile name="requirements-analysis-agent.md" path=".agent-os/agents/requirements-analysis-agent.md"></mcfile>**: Stakeholder engagement and requirement extraction
+- **<mcfile name="architecture-design-agent.md" path=".agent-os/agents/architecture-design-agent.md"></mcfile>**: System architecture and technology decisions
+- **<mcfile name="task-manager-agent.md" path=".agent-os/agents/task-manager-agent.md"></mcfile>**: Task management and coordination
+
+### 4. Prompt Engineering Framework
+- **<mcfile name="prompt-library.md" path=".agent-os/prompts/prompt-library.md"></mcfile>**: Comprehensive prompt collection and templates
+- **<mcfile name="context-engineering-framework.md" path=".agent-os/frameworks/context-engineering-framework.md"></mcfile>**: Context management and distribution
+
+### 5. Quality Assurance
+- **<mcfile name="enhancement-roadmap.md" path=".agent-os/roadmap/enhancement-roadmap.md"></mcfile>**: Future development plans and priorities
+- **<mcfile name="task-analysis-prompt.md" path=".agent-os/templates/task-analysis-prompt.md"></mcfile>**: Standardized task analysis templates
 - **<mcfile name="task-manager-agent.md" path="e:\Anwar_sales_eco\.agent-os\agents\task-manager-agent.md"></mcfile>**: Task planning, tracking, and coordination
 
 ### 4. Future Planning

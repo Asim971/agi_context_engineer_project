@@ -1,53 +1,43 @@
 # Database Directory
 
-This directory contains the database service layer for the Anwar Sales Ecosystem, providing abstraction for all Google Sheets interactions and data operations.
+This directory contains the database service for the Anwar Sales Management System.
 
-## Current Files
+## `DatabaseService.js`
 
-### `DatabaseService.js`
-Core database abstraction layer that provides:
-- Initializing the database and sheets
-- Inserting, updating, and retrieving records
-- Finding records based on specific criteria
-- Handling headers and data formatting
-- Legacy ID generation (now handled by IdService.js)
+This is the core database abstraction layer, providing a single, consistent interface for all interactions with the Google Sheets database. It is implemented as an ES6 class, `DatabaseService`, which extends `BaseService`.
 
-## Task List - Phase 1: Foundation Modernization
+### Architectural Role
 
-### High Priority Tasks
+- **Abstraction Layer**: It completely abstracts the underlying `SpreadsheetApp` and `DriveApp` services. This means other parts of the application (like handlers) do not need to know the details of how data is stored and retrieved.
+- **Single Responsibility**: Its sole responsibility is database operations (CRUD - Create, Read, Update, Delete).
+- **Testability**: It includes a crucial feature for testing. When instantiated in a test environment (`new DatabaseService(true)`), it will automatically connect to a temporary test spreadsheet instead of the production one.
 
-#### TASK-DB-001: Modernize DatabaseService Architecture
-- **Category**: Modernization
-- **Priority**: High
-- **Complexity**: Complex
-- **Phase 1 Alignment**: Modern JS | Service Architecture | Error Handling
-- **Description**: Refactor DatabaseService.js to use modern JavaScript patterns and service-oriented design
-- **Requirements**:
-  - Convert to ES6+ class-based architecture
-  - Implement async/await for all sheet operations
-  - Add comprehensive error handling with try-catch blocks
-  - Create modular service methods with clear interfaces
-  - Implement connection pooling and optimization
-- **Acceptance Criteria**:
-  - [ ] ES6+ class implementation with proper encapsulation
-  - [ ] Async/await pattern for all database operations
-  - [ ] Comprehensive error handling and recovery
-  - [ ] Modular service architecture
-  - [ ] Performance optimizations implemented
+### Key Features & Methods
 
-#### TASK-DB-002: Enhanced Error Handling and Recovery
-- **Category**: Enhancement
-- **Priority**: High
-- **Complexity**: Moderate
-- **Phase 1 Alignment**: Error Handling | Modern JS
-- **Description**: Implement robust error handling, retry mechanisms, and graceful degradation
-- **Requirements**:
-  - Add try-catch blocks for all sheet operations
-  - Implement retry logic for transient failures
-  - Create graceful degradation for sheet unavailability
-  - Add structured logging for database operations
-  - Implement transaction rollback capabilities
-- **Acceptance Criteria**:
+- **Dynamic Sheet Initialization**: Automatically creates sheets with the correct headers if they don't exist, ensuring the database structure is always correct.
+- **`insertRecord(sheetName, data)`**: Inserts a new row of data into the specified sheet. The `data` is an object where keys match the header names.
+- **`getAllRecords(sheetName)`**: Retrieves all records from a sheet as an array of objects.
+- **`findRecord(sheetName, key, value)`**: Finds the first record in a sheet that matches a specific key-value pair.
+- **`updateRecord(sheetName, key, value, newData)`**: Updates a specific record identified by a key-value pair with new data.
+- **Header Management**: Provides utilities to get column indexes by name, which makes the code more readable and resilient to changes in column order.
+
+### Usage
+
+The `DatabaseService` is instantiated as a global singleton. All other services should access it via the `getGlobalDB()` function to ensure they are using the same database connection.
+
+```javascript
+// Correct way to get the database instance
+const db = getGlobalDB();
+
+// Example: Inserting a new engineer record
+const engineerData = {
+  'Timestamp': new Date(),
+  'Name': 'Asim',
+  'Phone': '1234567890',
+  'Status': 'Pending'
+};
+db.insertRecord(Config.SHEETS.ENGINEER, engineerData);
+```
   - [ ] Try-catch blocks for all database operations
   - [ ] Retry mechanisms for failed operations
   - [ ] Graceful degradation strategies

@@ -1,52 +1,48 @@
 # Services Directory
 
-This directory contains modular services that provide specific functionalities to the Anwar Sales Ecosystem, implementing a service-oriented architecture pattern.
+This directory contains the core services for the Anwar Sales Management System. Each service is a single-responsibility ES6 class that extends `BaseService`, providing a modular, reusable, and testable architecture.
 
-## Current Files
+## Foundational Services
+
+These services form the bedrock of the application's architecture.
+
+### `BaseService.js`
+The abstract base class for all services and handlers. It is not used directly but provides essential, shared functionality to any class that extends it:
+- **`this.logger`**: A pre-configured instance of `LoggerService` for structured JSON logging.
+- **`this.errorHandler`**: A pre-configured instance of `ErrorHandlerService` for centralized error handling.
+- **`this.configService`**: A static accessor to the `ConfigurationService` for managing environment variables.
+- **`executeWithErrorHandling(Sync)`**: Wrapper methods that ensure any operation is automatically wrapped in a try-catch block, logging any errors that occur.
+
+### `LoggerService.js`
+Provides structured, leveled, and queryable JSON logging. It is accessed via `this.logger` in any service.
+
+### `ErrorHandlerService.js`
+A centralized service for catching, logging, and formatting errors throughout the application. It ensures that errors are handled consistently and provides detailed context for debugging.
+
+### `ConfigurationService.js`
+Manages all application settings and environment variables by providing a clean interface over Google's `PropertiesService`. It handles the distinction between `test` and `production` environments.
+
+## Business Logic & Integration Services
+
+These services handle specific business requirements and integrations with external APIs.
+
+### `DatabaseService.js`
+The sole interface for all Google Sheets operations. It abstracts away the complexities of `SpreadsheetApp` and provides methods for inserting, retrieving, and updating records. It is accessed via the global `getGlobalDB()` function.
 
 ### `IdService.js`
-Unique ID management service that:
-- Generates and assigns unique IDs for records
-- Manages ID sequences across different sheets
-- Provides ID validation and verification
-- Handles ID collision detection and resolution
+Manages the generation of unique, sequential IDs for all entities (e.g., Engineer, Retailer). It uses `LockService` to prevent race conditions and ensure ID uniqueness during concurrent executions.
 
-### `FormService.js`
-Form processing service that:
-- Handles form validation and processing
-- Manages form data transformation
-- Provides form submission workflows
-- Implements form security and sanitization
-
-### `LocationService.js`
-Location-based service that:
-- Provides geocoding and reverse geocoding
-- Manages location data and coordinates
-- Handles location-based queries and searches
-- Integrates with mapping and location APIs
-
-### `MigrationService.js`
-Data migration service that:
-- Manages database schema updates and migrations
-- Handles data transformation and migration tasks
-- Provides rollback and recovery capabilities
-- Manages version control for data structures
-
-### `TestEnvironmentService.js`
-Testing environment service that:
-- Provides testing utilities and configurations
-- Manages test data and mock services
-- Handles test environment setup and teardown
-- Provides testing helpers and assertions
+### `ValidationService.js`
+A powerful, rule-based validation engine. It is used by handlers to validate incoming data from form submissions against a predefined set of rules in `Config.js`.
 
 ### `WhatsAppService.js`
-WhatsApp integration service that:
-- Integrates with WhatsApp Business API
-- Manages messaging and communication workflows
-- Handles message templates and automation
-- Provides notification and alert capabilities
+Handles all interactions with the WhatsApp Business API (via Maytapi). It is responsible for sending notifications and formatted messages.
 
-## Task List - Phase 1: Foundation Modernization
+### `LocationService.js`
+Provides utilities for handling location data, such as calculating distances between coordinates.
+
+### `TestEnvironmentService.js`
+A utility service dedicated to setting up and tearing down a complete, isolated test environment in Google Drive for automated testing.
 
 ### High Priority Tasks
 
