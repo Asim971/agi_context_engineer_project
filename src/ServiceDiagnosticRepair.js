@@ -1,10 +1,10 @@
 /**
  * ServiceDiagnosticRepair.js
  * Google Apps Script Service Diagnostic and Repair Utility
- * 
+ *
  * Comprehensive troubleshooting and automatic repair system
  * for Google Apps Script service initialization issues
- * 
+ *
  * @fileoverview Service diagnostic and repair utility
  * @version 1.0.0
  * @author Google Apps Script Service Initialization Troubleshooter Agent
@@ -12,13 +12,13 @@
 
 var ServiceDiagnosticRepair = (function() {
   'use strict';
-  
+
   /**
    * Comprehensive service diagnostic system
    */
   function diagnoseServiceIssues() {
     console.log('🔍 Starting comprehensive service diagnostic...');
-    
+
     const diagnosticReport = {
       timestamp: new Date().toISOString(),
       overallStatus: 'UNKNOWN',
@@ -28,35 +28,35 @@ var ServiceDiagnosticRepair = (function() {
       serviceStatus: {},
       repairActions: []
     };
-    
+
     try {
       // 1. Check GlobalServiceLocator availability
       diagnosticReport.serviceStatus.GlobalServiceLocator = checkGlobalServiceLocator();
-      
+
       // 2. Check ServiceBootstrap availability
       diagnosticReport.serviceStatus.ServiceBootstrap = checkServiceBootstrap();
-      
+
       // 3. Check core services
       diagnosticReport.serviceStatus.Config = checkConfigService();
       diagnosticReport.serviceStatus.DatabaseService = checkDatabaseService();
       diagnosticReport.serviceStatus.HandlerService = checkHandlerService();
-      
+
       // 4. Check global accessors
       diagnosticReport.serviceStatus.globalAccessors = checkGlobalAccessors();
-      
+
       // 5. Check BaseService
       diagnosticReport.serviceStatus.BaseService = checkBaseService();
-      
+
       // 6. Analyze issues and determine status
       const analysis = analyzeServiceStatus(diagnosticReport.serviceStatus);
       diagnosticReport.criticalIssues = analysis.criticalIssues;
       diagnosticReport.warnings = analysis.warnings;
       diagnosticReport.recommendations = analysis.recommendations;
       diagnosticReport.overallStatus = analysis.overallStatus;
-      
+
       console.log('📊 Service diagnostic completed:', diagnosticReport);
       return diagnosticReport;
-      
+
     } catch (error) {
       console.error('❌ Service diagnostic failed:', error);
       diagnosticReport.overallStatus = 'DIAGNOSTIC_FAILED';
@@ -64,7 +64,7 @@ var ServiceDiagnosticRepair = (function() {
       return diagnosticReport;
     }
   }
-  
+
   /**
    * Check GlobalServiceLocator status
    */
@@ -75,11 +75,11 @@ var ServiceDiagnosticRepair = (function() {
       registeredServices: [],
       error: null
     };
-    
+
     try {
       if (typeof GlobalServiceLocator !== 'undefined') {
         status.available = true;
-        
+
         if (typeof GlobalServiceLocator.getStatus === 'function') {
           const locatorStatus = GlobalServiceLocator.getStatus();
           status.initialized = true;
@@ -91,10 +91,10 @@ var ServiceDiagnosticRepair = (function() {
     } catch (error) {
       status.error = error.message;
     }
-    
+
     return status;
   }
-  
+
   /**
    * Check ServiceBootstrap status
    */
@@ -104,11 +104,11 @@ var ServiceDiagnosticRepair = (function() {
       bootstrapped: false,
       error: null
     };
-    
+
     try {
       if (typeof ServiceBootstrap !== 'undefined') {
         status.available = true;
-        
+
         // Try to get status to see if it's been bootstrapped
         if (typeof ServiceBootstrap.getStatus === 'function') {
           ServiceBootstrap.getStatus();
@@ -120,10 +120,10 @@ var ServiceDiagnosticRepair = (function() {
     } catch (error) {
       status.error = error.message;
     }
-    
+
     return status;
   }
-  
+
   /**
    * Check Config service status
    */
@@ -134,13 +134,10 @@ var ServiceDiagnosticRepair = (function() {
       globalAccessorAccess: false,
       error: null
     };
-    
-    try {
-      // Check direct access
-      if (typeof Config !== 'undefined' && Config) {
-        status.directAccess = true;
-      }
-      
+
+      try {
+
+
       // Check service locator access
       if (typeof GlobalServiceLocator !== 'undefined') {
         try {
@@ -152,30 +149,19 @@ var ServiceDiagnosticRepair = (function() {
           // Not critical, just note it
         }
       }
-      
-      // Check global accessor
-      if (typeof getGlobalConfig === 'function') {
-        try {
-          const config = getGlobalConfig();
-          if (config) {
-            status.globalAccessorAccess = true;
-          }
-        } catch (accessorError) {
-          // Not critical, just note it
-        }
+
+      if (!status.serviceLocatorAccess) {
+        status.error = 'Config not accessible via GlobalServiceLocator';
+        throw new Error(status.error);
       }
-      
-      if (!status.directAccess && !status.serviceLocatorAccess && !status.globalAccessorAccess) {
-        status.error = 'Config not accessible through any method';
-      }
-      
+
     } catch (error) {
       status.error = error.message;
     }
-    
+
     return status;
   }
-  
+
   /**
    * Check DatabaseService status
    */
@@ -187,13 +173,10 @@ var ServiceDiagnosticRepair = (function() {
       instanceCreation: false,
       error: null
     };
-    
+
     try {
-      // Check class availability
-      if (typeof DatabaseService !== 'undefined') {
-        status.classAvailable = true;
-      }
-      
+
+
       // Check service locator access
       if (typeof GlobalServiceLocator !== 'undefined') {
         try {
@@ -205,38 +188,27 @@ var ServiceDiagnosticRepair = (function() {
           // Not critical
         }
       }
-      
-      // Check global accessor
-      if (typeof getGlobalDB === 'function') {
+
+      // Test instance creation via locator
+      if (status.serviceLocatorAccess) {
         try {
-          const db = getGlobalDB();
-          if (db) {
-            status.globalAccessorAccess = true;
-          }
-        } catch (accessorError) {
-          // Not critical
-        }
-      }
-      
-      // Test instance creation
-      if (status.classAvailable) {
-        try {
-          const testInstance = new DatabaseService();
+          const testInstance = GlobalServiceLocator.get('DatabaseService');
           if (testInstance) {
             status.instanceCreation = true;
           }
         } catch (instanceError) {
           status.error = `Instance creation failed: ${instanceError.message}`;
+          throw instanceError;
         }
       }
-      
+
     } catch (error) {
       status.error = error.message;
     }
-    
+
     return status;
   }
-  
+
   /**
    * Check HandlerService status
    */
@@ -247,41 +219,38 @@ var ServiceDiagnosticRepair = (function() {
       inheritance: false,
       error: null
     };
-    
+
     try {
-      // Check class availability
-      if (typeof HandlerService !== 'undefined') {
-        status.classAvailable = true;
-      }
-      
+
+
       // Check service locator access
       if (typeof GlobalServiceLocator !== 'undefined') {
         try {
           const HandlerServiceClass = GlobalServiceLocator.get('HandlerService');
           if (typeof HandlerServiceClass === 'function') {
             status.serviceLocatorAccess = true;
-            
+
             // Test inheritance capability
             class TestHandler extends HandlerServiceClass {
               constructor() {
                 super('TestSheet', ['Header1', 'Header2'], 'TEST');
               }
             }
-            
+
             status.inheritance = true;
           }
         } catch (locatorError) {
           status.error = `Service locator access failed: ${locatorError.message}`;
         }
       }
-      
+
     } catch (error) {
       status.error = error.message;
     }
-    
+
     return status;
   }
-  
+
   /**
    * Check global accessors
    */
@@ -293,10 +262,10 @@ var ServiceDiagnosticRepair = (function() {
       getService: typeof getService === 'function',
       getServiceStatus: typeof getServiceStatus === 'function'
     };
-    
+
     return status;
   }
-  
+
   /**
    * Check BaseService status
    */
@@ -306,26 +275,27 @@ var ServiceDiagnosticRepair = (function() {
       instantiable: false,
       error: null
     };
-    
+
     try {
-      if (typeof BaseService !== 'undefined') {
+      if (GlobalServiceLocator.has('BaseService')) {
         status.available = true;
-        
+
         // Test instantiation
-        const testInstance = new BaseService();
+        const testInstance = GlobalServiceLocator.get('BaseService');
         if (testInstance) {
           status.instantiable = true;
         }
       } else {
-        status.error = 'BaseService not defined';
+        status.error = 'BaseService not registered in GlobalServiceLocator';
+        throw new Error(status.error);
       }
     } catch (error) {
       status.error = error.message;
     }
-    
+
     return status;
   }
-  
+
   /**
    * Analyze service status and provide recommendations
    */
@@ -336,13 +306,13 @@ var ServiceDiagnosticRepair = (function() {
       warnings: [],
       recommendations: []
     };
-    
+
     // Check GlobalServiceLocator
     if (!serviceStatus.GlobalServiceLocator.available) {
       analysis.criticalIssues.push('GlobalServiceLocator not available');
       analysis.recommendations.push('Ensure 00_GlobalServiceLocator.js is loaded');
     }
-    
+
     // Check ServiceBootstrap
     if (!serviceStatus.ServiceBootstrap.available) {
       analysis.criticalIssues.push('ServiceBootstrap not available');
@@ -351,53 +321,47 @@ var ServiceDiagnosticRepair = (function() {
       analysis.warnings.push('ServiceBootstrap not executed');
       analysis.recommendations.push('Run ServiceBootstrap.bootstrap() to initialize services');
     }
-    
+
     // Check Config
-    if (!serviceStatus.Config.directAccess && !serviceStatus.Config.serviceLocatorAccess) {
-      analysis.criticalIssues.push('Config service not accessible');
-      analysis.recommendations.push('Verify Config.js is loaded and run service bootstrap');
+    if (!serviceStatus.Config.serviceLocatorAccess) {
+      analysis.criticalIssues.push('Config service not accessible via GlobalServiceLocator');
+      analysis.recommendations.push('Register Config in GlobalServiceLocator');
     }
-    
+
     // Check DatabaseService
-    if (!serviceStatus.DatabaseService.classAvailable) {
-      analysis.criticalIssues.push('DatabaseService class not available');
-      analysis.recommendations.push('Verify DatabaseService.js is loaded');
-    } else if (!serviceStatus.DatabaseService.globalAccessorAccess) {
-      analysis.warnings.push('getGlobalDB not working');
-      analysis.recommendations.push('Run service bootstrap to create global accessors');
+    if (!serviceStatus.DatabaseService.serviceLocatorAccess) {
+      analysis.criticalIssues.push('DatabaseService not accessible via GlobalServiceLocator');
+      analysis.recommendations.push('Register DatabaseService in GlobalServiceLocator');
     }
-    
+
     // Check HandlerService
-    if (!serviceStatus.HandlerService.classAvailable) {
-      analysis.criticalIssues.push('HandlerService class not available');
-      analysis.recommendations.push('Verify HandlerService.js is loaded');
-    } else if (!serviceStatus.HandlerService.inheritance) {
-      analysis.warnings.push('HandlerService inheritance not working');
-      analysis.recommendations.push('Use GlobalServiceLocator.get(\"HandlerService\") for inheritance');
+    if (!serviceStatus.HandlerService.serviceLocatorAccess) {
+      analysis.criticalIssues.push('HandlerService not accessible via GlobalServiceLocator');
+      analysis.recommendations.push('Register HandlerService in GlobalServiceLocator');
     }
-    
+
     // Check BaseService
     if (!serviceStatus.BaseService.available) {
-      analysis.criticalIssues.push('BaseService not available');
-      analysis.recommendations.push('Verify BaseService/Foundation files are loaded');
+      analysis.criticalIssues.push('BaseService not registered in GlobalServiceLocator');
+      analysis.recommendations.push('Register BaseService in GlobalServiceLocator');
     }
-    
+
     // Determine overall status
     if (analysis.criticalIssues.length > 0) {
       analysis.overallStatus = 'CRITICAL';
     } else if (analysis.warnings.length > 0) {
       analysis.overallStatus = 'WARNING';
     }
-    
+
     return analysis;
   }
-  
+
   /**
    * Attempt automatic repair of detected issues
    */
   function attemptAutomaticRepair(diagnosticReport) {
     console.log('🔧 Attempting automatic service repair...');
-    
+
     const repairReport = {
       timestamp: new Date().toISOString(),
       repairsAttempted: [],
@@ -405,14 +369,14 @@ var ServiceDiagnosticRepair = (function() {
       repairsFailed: [],
       finalStatus: 'UNKNOWN'
     };
-    
+
     try {
       // Repair 1: Initialize ServiceBootstrap if available but not bootstrapped
-      if (typeof ServiceBootstrap !== 'undefined' && 
+      if (typeof ServiceBootstrap !== 'undefined' &&
           !diagnosticReport.serviceStatus.ServiceBootstrap.bootstrapped) {
-        
+
         repairReport.repairsAttempted.push('ServiceBootstrap initialization');
-        
+
         try {
           const bootstrapResult = ServiceBootstrap.bootstrap();
           if (bootstrapResult.success) {
@@ -424,27 +388,14 @@ var ServiceDiagnosticRepair = (function() {
           repairReport.repairsFailed.push(`ServiceBootstrap initialization: ${bootstrapError.message}`);
         }
       }
-      
+
       // Repair 2: Create emergency global accessors if missing
-      if (!diagnosticReport.serviceStatus.globalAccessors.getGlobalDB) {
-        repairReport.repairsAttempted.push('Emergency getGlobalDB creation');
-        
-        try {
-          if (typeof DatabaseService !== 'undefined') {
-            globalThis.getGlobalDB = () => new DatabaseService();
-            repairReport.repairsSuccessful.push('Emergency getGlobalDB creation');
-          } else {
-            repairReport.repairsFailed.push('Emergency getGlobalDB creation: DatabaseService not available');
-          }
-        } catch (accessorError) {
-          repairReport.repairsFailed.push(`Emergency getGlobalDB creation: ${accessorError.message}`);
-        }
-      }
-      
+
+
       // Repair 3: Register critical services if GlobalServiceLocator is available
       if (typeof GlobalServiceLocator !== 'undefined') {
         repairReport.repairsAttempted.push('Critical service registration');
-        
+
         try {
           // Register Config if not registered
           if (!GlobalServiceLocator.has('Config') && typeof Config !== 'undefined') {
@@ -453,14 +404,14 @@ var ServiceDiagnosticRepair = (function() {
               factory: () => Config
             });
           }
-          
+
           // Register DatabaseService if not registered
           if (!GlobalServiceLocator.has('DatabaseService') && typeof DatabaseService !== 'undefined') {
             GlobalServiceLocator.register('DatabaseService', DatabaseService, {
               singleton: true
             });
           }
-          
+
           // Register HandlerService if not registered
           if (!GlobalServiceLocator.has('HandlerService') && typeof HandlerService !== 'undefined') {
             GlobalServiceLocator.register('HandlerService', null, {
@@ -468,14 +419,14 @@ var ServiceDiagnosticRepair = (function() {
               factory: () => HandlerService
             });
           }
-          
+
           repairReport.repairsSuccessful.push('Critical service registration');
-          
+
         } catch (registrationError) {
           repairReport.repairsFailed.push(`Critical service registration: ${registrationError.message}`);
         }
       }
-      
+
       // Determine final status
       if (repairReport.repairsFailed.length === 0) {
         repairReport.finalStatus = 'REPAIR_SUCCESSFUL';
@@ -484,10 +435,10 @@ var ServiceDiagnosticRepair = (function() {
       } else {
         repairReport.finalStatus = 'REPAIR_FAILED';
       }
-      
+
       console.log('🔧 Automatic repair completed:', repairReport);
       return repairReport;
-      
+
     } catch (error) {
       console.error('❌ Automatic repair failed:', error);
       repairReport.finalStatus = 'REPAIR_ERROR';
@@ -495,7 +446,7 @@ var ServiceDiagnosticRepair = (function() {
       return repairReport;
     }
   }
-  
+
   /**
    * Generate comprehensive repair instructions
    */
@@ -506,7 +457,7 @@ var ServiceDiagnosticRepair = (function() {
       severity: diagnosticReport.overallStatus,
       steps: []
     };
-    
+
     // Step 1: File loading order
     if (diagnosticReport.criticalIssues.some(issue => issue.includes('GlobalServiceLocator'))) {
       instructions.steps.push({
@@ -526,7 +477,7 @@ var ServiceDiagnosticRepair = (function() {
 // HandlerService.js`
       });
     }
-    
+
     // Step 2: Service initialization
     if (diagnosticReport.warnings.some(warning => warning.includes('ServiceBootstrap'))) {
       instructions.steps.push({
@@ -546,7 +497,7 @@ console.log(result);
 console.log(GlobalServiceLocator.getStatus());`
       });
     }
-    
+
     // Step 3: Manual service registration
     if (diagnosticReport.criticalIssues.some(issue => issue.includes('Config') || issue.includes('DatabaseService'))) {
       instructions.steps.push({
@@ -566,25 +517,23 @@ if (typeof GlobalServiceLocator !== 'undefined') {
     singleton: true,
     factory: () => Config
   });
-  
+
   // Register DatabaseService
   GlobalServiceLocator.register('DatabaseService', DatabaseService, {
     singleton: true
   });
-  
+
   // Register HandlerService
   GlobalServiceLocator.register('HandlerService', null, {
     singleton: false,
     factory: () => HandlerService
   });
-  
-  // Create global accessors
-  globalThis.getGlobalDB = () => GlobalServiceLocator.get('DatabaseService');
-  globalThis.getGlobalConfig = () => GlobalServiceLocator.get('Config');
+
+  // Use service locator directly instead of global accessors
 }`
       });
     }
-    
+
     // Step 4: Handler class fixes
     if (diagnosticReport.criticalIssues.some(issue => issue.includes('HandlerService'))) {
       instructions.steps.push({
@@ -600,43 +549,43 @@ if (typeof GlobalServiceLocator !== 'undefined') {
 var MyHandler = (function() {
   // Get HandlerService class via service locator
   const HandlerServiceClass = GlobalServiceLocator.get('HandlerService');
-  
+
   class MyHandler extends HandlerServiceClass {
     constructor() {
       const config = GlobalServiceLocator.get('Config');
       super(config.SHEETS.MY_SHEET, config.HEADERS.MY_SHEET, 'MY');
     }
   }
-  
+
   return MyHandler;
 })();`
       });
     }
-    
+
     return instructions;
   }
-  
+
   // Public API
   return {
     diagnose: diagnoseServiceIssues,
     repair: attemptAutomaticRepair,
     generateInstructions: generateRepairInstructions,
-    
+
     /**
      * Complete diagnostic and repair workflow
      */
     fullRepair() {
       console.log('🚨 Starting complete service diagnostic and repair workflow...');
-      
+
       // Step 1: Diagnose
       const diagnostic = this.diagnose();
-      
+
       // Step 2: Attempt automatic repair
       const repair = this.repair(diagnostic);
-      
+
       // Step 3: Generate instructions for manual fixes
       const instructions = this.generateInstructions(diagnostic);
-      
+
       const result = {
         diagnostic,
         repair,
@@ -648,7 +597,7 @@ var MyHandler = (function() {
           manualStepsRequired: instructions.steps.length
         }
       };
-      
+
       console.log('📋 Complete repair workflow finished:', result.summary);
       return result;
     }
@@ -659,7 +608,8 @@ var MyHandler = (function() {
  * Global registration
  */
 if (typeof globalThis !== 'undefined') {
-  globalThis.ServiceDiagnosticRepair = ServiceDiagnosticRepair;
+  // Removed global assignment for ServiceDiagnosticRepair
+// Access via import or service locator as needed
 }
 
 console.log('✅ ServiceDiagnosticRepair utility loaded and ready');

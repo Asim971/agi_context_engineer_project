@@ -35,9 +35,7 @@ function initializeServices() {
     for (const serviceName of coreServices) {
       try {
         // Check global scope - Google Apps Script doesn't have window object
-        const isAvailable = (typeof globalThis !== 'undefined' && typeof globalThis[serviceName] !== 'undefined') ||
-                           (typeof global !== 'undefined' && typeof global[serviceName] !== 'undefined') ||
-                           (typeof eval(serviceName) !== 'undefined');
+        const isAvailable = GlobalServiceLocator.has(serviceName);
         
         if (isAvailable) {
           diagnostics.services[serviceName] = 'available';
@@ -59,32 +57,12 @@ function initializeServices() {
     console.log('Phase 2: Service dependency initialization...');
     
     // Validate BaseService before proceeding
-    if (typeof BaseService === 'undefined') {
-      console.warn('⚠️ BaseService not found, attempting emergency creation...');
-      // Try to create emergency BaseService if not available
-      try {
-        if (typeof createEmergencyBaseService === 'function') {
-          createEmergencyBaseService();
-          console.log('✅ Emergency BaseService created successfully');
-        } else {
-          console.error('❌ Emergency BaseService creation function not available');
-          const error = new Error('BaseService not available and cannot be created. Check file loading order.');
-          diagnostics.errors.push(error.message);
-          // Don't throw, just log and continue
-          console.error('Continuing without BaseService...');
-        }
-      } catch (emergencyError) {
-        console.error('❌ Emergency BaseService creation failed:', emergencyError);
-        diagnostics.errors.push(`Emergency BaseService creation failed: ${emergencyError.message}`);
-      }
-    } else {
-      console.log('✅ BaseService is available');
+    if (!GlobalServiceLocator.has('BaseService')) {
+      throw new Error('BaseService not registered in GlobalServiceLocator.');
     }
     
     // Initialize global service registry if needed
-    if (typeof serviceRegistry === 'undefined') {
-      diagnostics.warnings.push('ServiceRegistry not available - using direct instantiation');
-    }
+    
     
     // Phase 3: Database service validation
     console.log('Phase 3: Database service validation...');
@@ -117,9 +95,7 @@ function initializeServices() {
     for (const funcName of globalFunctions) {
       try {
         // Check global scope safely - Google Apps Script doesn't have window object
-        const isAvailable = (typeof globalThis !== 'undefined' && typeof globalThis[funcName] === 'function') ||
-                           (typeof global !== 'undefined' && typeof global[funcName] === 'function') ||
-                           (typeof eval(`typeof ${funcName}`) !== 'undefined' && typeof eval(funcName) === 'function');
+        const isAvailable = typeof eval(funcName) === 'function';
         
         if (isAvailable) {
           diagnostics.services[funcName] = 'available';
@@ -183,7 +159,7 @@ function validateServiceDependencies(requiredServices = []) {
   const available = [];
   
   for (const serviceName of requiredServices) {
-    if (typeof globalThis[serviceName] !== 'undefined' || typeof window[serviceName] !== 'undefined') {
+    if (GlobalServiceLocator.has(serviceName)) {
       available.push(serviceName);
     } else {
       missing.push(serviceName);
@@ -273,78 +249,4 @@ function performServiceHealthCheck() {
   console.log(`Overall health: ${healthStatus.overall} (${healthyCount}/${totalCount} services healthy)`);
   
   return healthStatus;
-}
-
-// Ensure functions are globally accessible
-if (typeof globalThis !== 'undefined') {
-  globalThis.initializeServices = initializeServices;
-  globalThis.validateServiceDependencies = validateServiceDependencies;
-  globalThis.performServiceHealthCheck = performServiceHealthCheck;
-}
-
-// Auto-initialize services when this file loads
-// Wrapped in try-catch to prevent blocking other file loads
-try {
-  console.log('🚀 Auto-initializing services...');
-  const initResult = initializeServices();
-  
-  if (initResult.success) {
-    console.log('✅ Services auto-initialized successfully');
-  } else {
-    console.warn('⚠️ Service auto-initialization completed with issues:', initResult.diagnostics.errors);
-  }
-} catch (error) {
-  console.error('❌ Service auto-initialization failed:', error);
-  // Don't throw - allow other files to continue loading
-}
-
-/**
- * Emergency service recovery function
- * Attempts to recover from service initialization failures
- */
-function emergencyServiceRecovery() {
-  console.log('🚨 Emergency Service Recovery Initiated');
-  
-  try {
-    // Try to manually load BaseService if missing
-    if (typeof BaseService === 'undefined') {
-      console.error('BaseService missing - manual recovery required');
-      return {
-        success: false,
-        message: 'BaseService missing - check BaseService.js file loading'
-      };
-    }
-    
-    // Try to create fallback services
-    const recovery = {
-      BaseService: typeof BaseService !== 'undefined',
-      DatabaseService: false
-    };
-    
-    if (typeof DatabaseService !== 'undefined') {
-      try {
-        const testDB = new DatabaseService(true);
-        recovery.DatabaseService = true;
-      } catch (error) {
-        console.error('DatabaseService recovery failed:', error);
-      }
-    }
-    
-    return {
-      success: recovery.BaseService && recovery.DatabaseService,
-      recovery
-    };
-    
-  } catch (error) {
-    console.error('Emergency recovery failed:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}
-
-// Make emergency recovery globally available
-if (typeof globalThis !== 'undefined') {
-  globalThis.emergencyServiceRecovery = emergencyServiceRecovery;
 }

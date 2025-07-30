@@ -34,18 +34,29 @@ var AppScriptError = class AppScriptError extends Error {
   }
 
   /**
-   * Categorizes error based on error code
+   * Categorizes error based on error code with GAS-specific categorization
    * @param {string} code - Error code
    * @returns {string} Error category
    */
   categorizeError(code) {
     const categories = {
+      // Existing categories
       'VALIDATION_': 'VALIDATION',
       'API_': 'INTEGRATION',
       'DATABASE_': 'SYSTEM',
       'BUSINESS_': 'BUSINESS',
       'AUTH_': 'SECURITY',
-      'CONFIG_': 'CONFIGURATION'
+      'CONFIG_': 'CONFIGURATION',
+      
+      // GAS-specific categories
+      'GAS_QUOTA_': 'GAS_QUOTA',
+      'GAS_EXECUTION_': 'GAS_EXECUTION',
+      'GAS_PERMISSION_': 'GAS_PERMISSION',
+      'GAS_SCRIPT_': 'GAS_SCRIPT',
+      'GAS_TRIGGER_': 'GAS_TRIGGER',
+      'GAS_SERVICE_': 'GAS_SERVICE',
+      'GAS_LOCK_': 'GAS_LOCK',
+      'GAS_PROPERTIES_': 'GAS_PROPERTIES'
     };
 
     for (const [prefix, category] of Object.entries(categories)) {
@@ -89,13 +100,23 @@ var ErrorHandlerService = class ErrorHandlerService {
   }
 
   /**
-   * Initialize recovery strategies for different error types
+   * Initialize recovery strategies for different error types including GAS-specific errors
    */
   initializeRecoveryStrategies() {
     // API-related recovery strategies
     this.recoveryStrategies.set('API_TIMEOUT', this.retryWithBackoff.bind(this));
     this.recoveryStrategies.set('API_RATE_LIMIT', this.exponentialBackoff.bind(this));
     this.recoveryStrategies.set('API_CONNECTION_ERROR', this.retryWithBackoff.bind(this));
+
+    // GAS-specific recovery strategies
+    this.recoveryStrategies.set('GAS_QUOTA_EXCEEDED', this.handleQuotaExceeded.bind(this));
+    this.recoveryStrategies.set('GAS_EXECUTION_TIMEOUT', this.handleExecutionTimeout.bind(this));
+    this.recoveryStrategies.set('GAS_PERMISSION_DENIED', this.handlePermissionDenied.bind(this));
+    this.recoveryStrategies.set('GAS_SCRIPT_DISABLED', this.handleScriptDisabled.bind(this));
+    this.recoveryStrategies.set('GAS_TRIGGER_LIMIT_EXCEEDED', this.handleTriggerLimitExceeded.bind(this));
+    this.recoveryStrategies.set('GAS_LOCK_TIMEOUT', this.handleLockTimeout.bind(this));
+    this.recoveryStrategies.set('GAS_SERVICE_UNAVAILABLE', this.retryWithBackoff.bind(this));
+    this.recoveryStrategies.set('GAS_PROPERTIES_QUOTA_EXCEEDED', this.handlePropertiesQuotaExceeded.bind(this));
 
     // Database-related recovery strategies
     this.recoveryStrategies.set('DATABASE_LOCK', this.retryWithBackoff.bind(this));
@@ -307,6 +328,215 @@ var ErrorHandlerService = class ErrorHandlerService {
       'CONFIG_NO_DEFAULT',
       `No default configuration available for: ${configKey}`,
       { originalError: error }
+    );
+  }
+
+  /**
+   * Handle GAS quota exceeded errors
+   * @param {AppScriptError} error - Quota error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handleQuotaExceeded(error, context) {
+    // Log quota exceeded event
+    await this.logError(new AppScriptError(
+      'GAS_QUOTA_MONITORING',
+      `Quota exceeded: ${error.message}`,
+      { quotaType: context.quotaType, currentUsage: context.currentUsage },
+      false,
+      'CRITICAL'
+    ), context);
+
+    // Implement graceful degradation
+    if (context.fallbackOperation) {
+      return await context.fallbackOperation();
+    }
+
+    // Schedule retry for next quota reset period
+    throw new AppScriptError(
+      'GAS_QUOTA_EXCEEDED_NO_FALLBACK',
+      'Quota exceeded and no fallback operation available',
+      { originalError: error.code, retryAfter: '24 hours' },
+      false,
+      'CRITICAL'
+    );
+  }
+
+  /**
+   * Handle GAS execution timeout errors
+   * @param {AppScriptError} error - Timeout error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handleExecutionTimeout(error, context) {
+    // Break operation into smaller chunks if possible
+    if (context.chunkOperation) {
+      return await context.chunkOperation();
+    }
+
+    // Retry with reduced scope
+    if (context.reducedScopeOperation) {
+      return await context.reducedScopeOperation();
+    }
+
+    throw new AppScriptError(
+      'GAS_EXECUTION_TIMEOUT_NO_RECOVERY',
+      'Execution timeout with no chunking strategy available',
+      { originalError: error.code, executionTime: context.executionTime },
+      false,
+      'ERROR'
+    );
+  }
+
+  /**
+   * Handle GAS permission denied errors
+   * @param {AppScriptError} error - Permission error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handlePermissionDenied(error, context) {
+    // Log permission issue for admin review
+    await this.logError(new AppScriptError(
+      'GAS_PERMISSION_AUDIT',
+      `Permission denied: ${error.message}`,
+      { resource: context.resource, requiredScope: context.requiredScope },
+      false,
+      'CRITICAL'
+    ), context);
+
+    // Try alternative approach if available
+    if (context.alternativeOperation) {
+      return await context.alternativeOperation();
+    }
+
+    throw new AppScriptError(
+      'GAS_PERMISSION_DENIED_NO_ALTERNATIVE',
+      'Permission denied and no alternative operation available',
+      { originalError: error.code, resource: context.resource },
+      false,
+      'CRITICAL'
+    );
+  }
+
+  /**
+   * Handle GAS script disabled errors
+   * @param {AppScriptError} error - Script disabled error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handleScriptDisabled(error, context) {
+    // Log critical system issue
+    await this.logError(new AppScriptError(
+      'GAS_SCRIPT_DISABLED_CRITICAL',
+      'Script has been disabled - requires immediate admin intervention',
+      { scriptId: context.scriptId, disabledReason: context.reason },
+      false,
+      'CRITICAL'
+    ), context);
+
+    // Notify administrators immediately
+    await this.notifyStakeholders(error, {
+      ...context,
+      urgency: 'IMMEDIATE',
+      actionRequired: 'Re-enable script in Google Apps Script console'
+    });
+
+    throw new AppScriptError(
+      'GAS_SCRIPT_DISABLED_NO_RECOVERY',
+      'Script disabled - manual intervention required',
+      { originalError: error.code },
+      false,
+      'CRITICAL'
+    );
+  }
+
+  /**
+   * Handle GAS trigger limit exceeded errors
+   * @param {AppScriptError} error - Trigger limit error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handleTriggerLimitExceeded(error, context) {
+    // Clean up old triggers if possible
+    if (context.cleanupTriggers) {
+      await context.cleanupTriggers();
+      // Retry original operation
+      if (context.operation) {
+        return await context.operation();
+      }
+    }
+
+    // Use alternative scheduling mechanism
+    if (context.alternativeScheduling) {
+      return await context.alternativeScheduling();
+    }
+
+    throw new AppScriptError(
+      'GAS_TRIGGER_LIMIT_NO_CLEANUP',
+      'Trigger limit exceeded and no cleanup strategy available',
+      { originalError: error.code, currentTriggers: context.currentTriggers },
+      false,
+      'ERROR'
+    );
+  }
+
+  /**
+   * Handle GAS lock timeout errors
+   * @param {AppScriptError} error - Lock timeout error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handleLockTimeout(error, context) {
+    // Implement exponential backoff for lock acquisition
+    const attempt = context.attempt || 1;
+    const maxAttempts = 5;
+    
+    if (attempt <= maxAttempts) {
+      const delay = Math.min(1000 * Math.pow(2, attempt), 30000); // Max 30 seconds
+      await this.sleep(delay);
+      
+      if (context.operation) {
+        return await context.operation();
+      }
+    }
+
+    throw new AppScriptError(
+      'GAS_LOCK_TIMEOUT_MAX_RETRIES',
+      'Lock timeout after maximum retry attempts',
+      { originalError: error.code, attempts: attempt },
+      false,
+      'ERROR'
+    );
+  }
+
+  /**
+   * Handle GAS properties quota exceeded errors
+   * @param {AppScriptError} error - Properties quota error
+   * @param {Object} context - Error context
+   * @returns {Promise<any>} Recovery result
+   */
+  async handlePropertiesQuotaExceeded(error, context) {
+    // Clean up old properties if cleanup strategy available
+    if (context.cleanupProperties) {
+      await context.cleanupProperties();
+      
+      // Retry original operation
+      if (context.operation) {
+        return await context.operation();
+      }
+    }
+
+    // Use alternative storage mechanism
+    if (context.alternativeStorage) {
+      return await context.alternativeStorage();
+    }
+
+    throw new AppScriptError(
+      'GAS_PROPERTIES_QUOTA_NO_CLEANUP',
+      'Properties quota exceeded and no cleanup strategy available',
+      { originalError: error.code },
+      false,
+      'ERROR'
     );
   }
 

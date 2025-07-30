@@ -112,22 +112,24 @@ class ServiceInitializationTestSuite extends BaseService {
       return { success: true, message: 'Service inheritance chain working correctly' };
     });
 
-    // Test 3: Global service functions
-    this.runTest(results, 'Global Service Functions', () => {
-      const requiredFunctions = ['getGlobalDB', 'getGlobalLogger', 'getGlobalConfig'];
-      const missingFunctions = [];
+    // Test 3: Service registration in GlobalServiceLocator
+    this.runTest(results, 'Service Registration in GlobalServiceLocator', () => {
+      const requiredServices = ['Config', 'DatabaseService', 'HandlerService'];
+      const missingServices = [];
       
-      requiredFunctions.forEach(funcName => {
-        if (typeof globalThis[funcName] !== 'function') {
-          missingFunctions.push(funcName);
+      requiredServices.forEach(serviceName => {
+        try {
+          GlobalServiceLocator.get(serviceName);
+        } catch (error) {
+          missingServices.push(serviceName);
         }
       });
       
-      if (missingFunctions.length > 0) {
-        throw new Error(`Missing global functions: ${missingFunctions.join(', ')}`);
+      if (missingServices.length > 0) {
+        throw new Error(`Services not registered in GlobalServiceLocator: ${missingServices.join(', ')}`);
       }
       
-      return { success: true, message: 'All global service functions available' };
+      return { success: true, message: 'All required services registered in GlobalServiceLocator' };
     });
 
     // Test 4: Service loading order
@@ -246,20 +248,22 @@ class ServiceInitializationTestSuite extends BaseService {
 
     // Test 1: Health monitor availability
     this.runTest(results, 'Health Monitor Availability', () => {
-      if (typeof ServiceHealthMonitor === 'undefined') {
-        throw new Error('ServiceHealthMonitor class not available');
+      try {
+        const healthMonitor = GlobalServiceLocator.get('ServiceHealthMonitor');
+        if (!healthMonitor) {
+          throw new Error('ServiceHealthMonitor not registered in GlobalServiceLocator');
+        }
+      } catch (error) {
+        throw new Error('ServiceHealthMonitor not available via GlobalServiceLocator');
       }
       
-      if (typeof healthCheck !== 'function') {
-        throw new Error('healthCheck global function not available');
-      }
-      
-      return { success: true, message: 'Health monitoring system available' };
+      return { success: true, message: 'Health monitoring system available via GlobalServiceLocator' };
     });
 
     // Test 2: Health check execution
     this.runTest(results, 'Health Check Execution', () => {
-      const healthStatus = healthCheck();
+      const healthMonitor = GlobalServiceLocator.get('ServiceHealthMonitor');
+      const healthStatus = healthMonitor.performHealthCheck();
       
       if (!healthStatus || typeof healthStatus !== 'object') {
         throw new Error('Health check returned invalid result');
@@ -274,18 +278,15 @@ class ServiceInitializationTestSuite extends BaseService {
       
       return { 
         success: true, 
-        message: 'Health check execution successful',
+        message: 'Health check execution successful via GlobalServiceLocator',
         overallStatus: healthStatus.overallStatus
       };
     });
 
     // Test 3: Quick health check
     this.runTest(results, 'Quick Health Check', () => {
-      if (typeof quickHealthCheck !== 'function') {
-        throw new Error('quickHealthCheck function not available');
-      }
-      
-      const quickStatus = quickHealthCheck();
+      const healthMonitor = GlobalServiceLocator.get('ServiceHealthMonitor');
+      const quickStatus = healthMonitor.quickHealthCheck();
       
       if (!quickStatus || !quickStatus.coreServices) {
         throw new Error('Quick health check returned invalid result');
@@ -293,7 +294,7 @@ class ServiceInitializationTestSuite extends BaseService {
       
       return { 
         success: true, 
-        message: 'Quick health check working',
+        message: 'Quick health check working via GlobalServiceLocator',
         status: quickStatus.overallStatus
       };
     });
@@ -310,24 +311,29 @@ class ServiceInitializationTestSuite extends BaseService {
 
     // Test 1: Recovery system availability
     this.runTest(results, 'Recovery System Availability', () => {
-      if (typeof ServiceRecoverySystem === 'undefined') {
-        throw new Error('ServiceRecoverySystem class not available');
+      try {
+        const recoverySystem = GlobalServiceLocator.get('ServiceRecoverySystem');
+        if (!recoverySystem) {
+          throw new Error('ServiceRecoverySystem not registered in GlobalServiceLocator');
+        }
+        
+        if (typeof recoverySystem.performRecovery !== 'function') {
+          throw new Error('ServiceRecoverySystem performRecovery method not available');
+        }
+        
+        if (typeof recoverySystem.emergencyRecovery !== 'function') {
+          throw new Error('ServiceRecoverySystem emergencyRecovery method not available');
+        }
+      } catch (error) {
+        throw new Error('ServiceRecoverySystem not available via GlobalServiceLocator');
       }
       
-      if (typeof performServiceRecovery !== 'function') {
-        throw new Error('performServiceRecovery function not available');
-      }
-      
-      if (typeof emergencyServiceRecovery !== 'function') {
-        throw new Error('emergencyServiceRecovery function not available');
-      }
-      
-      return { success: true, message: 'Recovery system fully available' };
+      return { success: true, message: 'Recovery system fully available via GlobalServiceLocator' };
     });
 
     // Test 2: Recovery system instantiation
     this.runTest(results, 'Recovery System Instantiation', () => {
-      const recoverySystem = new ServiceRecoverySystem();
+      const recoverySystem = GlobalServiceLocator.get('ServiceRecoverySystem');
       
       if (!(recoverySystem instanceof BaseService)) {
         throw new Error('ServiceRecoverySystem does not inherit from BaseService');
@@ -340,14 +346,14 @@ class ServiceInitializationTestSuite extends BaseService {
       
       return { 
         success: true, 
-        message: 'Recovery system instantiation successful',
+        message: 'Recovery system instantiation successful via GlobalServiceLocator',
         strategiesCount: recoverySystem.recoveryStrategies.size
       };
     });
 
     // Test 3: Recovery strategy detection
     this.runTest(results, 'Recovery Strategy Detection', () => {
-      const recoverySystem = new ServiceRecoverySystem();
+      const recoverySystem = GlobalServiceLocator.get('ServiceRecoverySystem');
       
       // Test each strategy's detection logic
       const strategies = Array.from(recoverySystem.recoveryStrategies.entries());
@@ -369,7 +375,7 @@ class ServiceInitializationTestSuite extends BaseService {
       
       return { 
         success: true, 
-        message: 'Recovery strategy detection working',
+        message: 'Recovery strategy detection working via GlobalServiceLocator',
         workingStrategies: workingStrategies.length,
         results: workingStrategies
       };
@@ -391,7 +397,8 @@ class ServiceInitializationTestSuite extends BaseService {
       const mockHeaders = ['Name', 'Status'];
       const handler = new HandlerService('IntegrationTest', mockHeaders);
       
-      const healthStatus = healthCheck();
+      const healthMonitor = GlobalServiceLocator.get('ServiceHealthMonitor');
+      const healthStatus = healthMonitor.performHealthCheck();
       
       if (healthStatus.overallStatus === 'CRITICAL') {
         throw new Error('Critical health issues detected during handler integration');
@@ -399,18 +406,21 @@ class ServiceInitializationTestSuite extends BaseService {
       
       return { 
         success: true, 
-        message: 'Handler and health monitor integration successful',
+        message: 'Handler and health monitor integration successful via GlobalServiceLocator',
         healthStatus: healthStatus.overallStatus
       };
     });
 
     // Test 2: Health Monitor + Recovery System integration
     this.runTest(results, 'HealthMonitor-Recovery Integration', () => {
-      const healthStatus = healthCheck();
+      const healthMonitor = GlobalServiceLocator.get('ServiceHealthMonitor');
+      const recoverySystem = GlobalServiceLocator.get('ServiceRecoverySystem');
+      
+      const healthStatus = healthMonitor.performHealthCheck();
       
       // If there are issues, test recovery
       if (healthStatus.errors && healthStatus.errors.length > 0) {
-        const recoveryResult = performServiceRecovery();
+        const recoveryResult = recoverySystem.performRecovery();
         
         if (!recoveryResult.overallSuccess && recoveryResult.attempted.length > 0) {
           throw new Error('Recovery system failed to resolve detected issues');
@@ -419,7 +429,7 @@ class ServiceInitializationTestSuite extends BaseService {
       
       return { 
         success: true, 
-        message: 'Health monitor and recovery system integration working',
+        message: 'Health monitor and recovery system integration working via GlobalServiceLocator',
         issuesDetected: healthStatus.errors?.length || 0
       };
     });
@@ -500,33 +510,36 @@ class ServiceInitializationTestSuite extends BaseService {
 
     // Test 3: Recovery from simulated failures
     this.runTest(results, 'Recovery from Simulated Failures', () => {
-      // Simulate a service failure by temporarily removing a global function
-      const originalGetGlobalDB = globalThis.getGlobalDB;
-      delete globalThis.getGlobalDB;
+      const healthMonitor = GlobalServiceLocator.get('ServiceHealthMonitor');
+      const recoverySystem = GlobalServiceLocator.get('ServiceRecoverySystem');
+      
+      // Simulate a service failure by temporarily removing a service
+      const originalDatabaseService = GlobalServiceLocator.get('DatabaseService');
+      GlobalServiceLocator.unregister('DatabaseService');
       
       try {
         // Check if recovery detects the issue
-        const healthStatus = healthCheck();
+        const healthStatus = healthMonitor.performHealthCheck();
         
-        if (!healthStatus.errors.some(error => error.includes('getGlobalDB'))) {
-          throw new Error('Health check did not detect missing getGlobalDB');
+        if (!healthStatus.errors.some(error => error.includes('DatabaseService'))) {
+          throw new Error('Health check did not detect missing DatabaseService');
         }
         
         // Attempt recovery
-        const recoveryResult = performServiceRecovery(['GlobalFunctions']);
+        const recoveryResult = recoverySystem.performRecovery(['DatabaseService']);
         
-        // Restore original function for other tests
-        globalThis.getGlobalDB = originalGetGlobalDB;
+        // Restore original service for other tests
+        GlobalServiceLocator.register('DatabaseService', originalDatabaseService);
         
         return { 
           success: true, 
-          message: 'Simulated failure detection and recovery working',
+          message: 'Simulated failure detection and recovery working via GlobalServiceLocator',
           recoveryAttempted: recoveryResult.attempted.length > 0
         };
         
       } catch (error) {
-        // Make sure to restore the function even if test fails
-        globalThis.getGlobalDB = originalGetGlobalDB;
+        // Make sure to restore the service even if test fails
+        GlobalServiceLocator.register('DatabaseService', originalDatabaseService);
         throw error;
       }
     });
@@ -651,9 +664,6 @@ function generateServiceTestReport() {
   return report;
 }
 
-// Global registration
-if (typeof globalThis !== 'undefined') {
-  globalThis.runServiceInitializationTests = runServiceInitializationTests;
-  globalThis.generateServiceTestReport = generateServiceTestReport;
-  globalThis.ServiceInitializationTestSuite = ServiceInitializationTestSuite;
-}
+// Export for module usage - no global assignments
+// Services should be accessed via GlobalServiceLocator
+// Test functions should be imported as needed

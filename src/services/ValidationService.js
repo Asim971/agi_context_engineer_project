@@ -75,11 +75,36 @@ var ValidationService = class ValidationService extends BaseService {
   }
 }
 
-// --- Global Instance ---
-const validationServiceInstance = new ValidationService();
+// Export ValidationService globally for Google Apps Script environment
+if (typeof globalThis !== 'undefined') {
+  globalThis.ValidationService = ValidationService;
+}
+
+// Also make it available as a module export for Node.js testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ValidationService;
+}
+
+// --- Global Instance (Lazy Loading) ---
+let validationServiceInstance = null;
 
 const ValidationServiceGlobal = {
-  assertRequiredFields: (data, requiredFields, entityName) => validationServiceInstance.assertRequiredFields(data, requiredFields, entityName),
-  validateEmail: (email) => validationServiceInstance.validateEmail(email),
-  validatePhone: (phone) => validationServiceInstance.validatePhone(phone)
+  assertRequiredFields: (data, requiredFields, entityName) => {
+    if (!validationServiceInstance) {
+      validationServiceInstance = new ValidationService();
+    }
+    return validationServiceInstance.assertRequiredFields(data, requiredFields, entityName);
+  },
+  validateEmail: (email) => {
+    if (!validationServiceInstance) {
+      validationServiceInstance = new ValidationService();
+    }
+    return validationServiceInstance.validateEmail(email);
+  },
+  validatePhone: (phone) => {
+    if (!validationServiceInstance) {
+      validationServiceInstance = new ValidationService();
+    }
+    return validationServiceInstance.validatePhone(phone);
+  }
 };

@@ -15,7 +15,7 @@
  * IMPORTANT: Using var assignment pattern to ensure global accessibility
  * This fixes: ReferenceError: BaseService is not defined
  */
-var BaseService = class BaseService {
+class BaseService {
   /**
    * Creates a new BaseService instance
    * @param {Object} dependencies - Injected dependencies
@@ -27,13 +27,18 @@ var BaseService = class BaseService {
    * @param {Object} dependencies.monitor - Performance monitoring service
    */
   constructor(dependencies = {}) {
-    // Dependency injection with fallbacks to global services
-    this.config = dependencies.config || (typeof Config !== 'undefined' ? Config : {});
-    this.logger = dependencies.logger || (typeof Logger !== 'undefined' ? Logger : console);
-    this.errorHandler = dependencies.errorHandler || null;
-    this.validator = dependencies.validator || null;
-    this.cache = dependencies.cache || null;
-    this.monitor = dependencies.monitor || null;
+
+    // Strict dependency injection using GlobalServiceLocator
+    this.config = GlobalServiceLocator.get('Config');
+    if (!this.config) throw new Error('Config service is required');
+    this.logger = GlobalServiceLocator.get('Logger');
+    if (!this.logger) {
+      throw new Error('Logger service not available via GlobalServiceLocator');
+    }
+    this.errorHandler = GlobalServiceLocator.get('ErrorHandler');
+    this.validator = GlobalServiceLocator.get('Validator');
+    this.cache = GlobalServiceLocator.get('Cache');
+    this.monitor = GlobalServiceLocator.get('Monitor');
     
     // Service metadata
     this.serviceName = this.constructor.name;
@@ -394,8 +399,8 @@ var BaseService = class BaseService {
     if (this.logger && typeof this.logger[level] === 'function') {
       this.logger[level](message, enhancedContext, this.serviceName);
     } else {
-      // Fallback to console
-      console[level] || console.log(`[${level.toUpperCase()}] [${this.serviceName}] ${message}`, enhancedContext);
+      // Strict dependency injection - no fallbacks
+      throw new Error('Logger service not available via GlobalServiceLocator');
     }
   }
 
@@ -468,22 +473,12 @@ var BaseService = class BaseService {
   }
 };
 
-// Ensure BaseService is globally accessible for all other services
-// Critical: Google Apps Script requires global assignment for cross-file access
+// Export BaseService globally for Google Apps Script environment
 if (typeof globalThis !== 'undefined') {
   globalThis.BaseService = BaseService;
 }
-// Also assign to global object for maximum compatibility
-if (typeof global !== 'undefined') {
-  global.BaseService = BaseService;
-}
-// Direct assignment to ensure availability
-try {
-  // Make BaseService available in current execution context
-  if (typeof this !== 'undefined') {
-    this.BaseService = BaseService;
-  }
-} catch (e) {
-  // Fallback assignment
-  console.warn('BaseService global assignment warning:', e.message);
+
+// Also make it available as a module export for Node.js testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = BaseService;
 }

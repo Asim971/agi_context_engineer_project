@@ -240,12 +240,8 @@ function testOriginalError() {
   }
 }
 
-// Make functions globally accessible
-if (typeof globalThis !== 'undefined') {
-  globalThis.testBaseServiceResolution = testBaseServiceResolution;
-  globalThis.diagnosticServiceLoadingOrder = diagnosticServiceLoadingOrder;
-  globalThis.testOriginalError = testOriginalError;
-}
+// Removed global assignments for test functions to promote proper dependency injection
+// These test functions can now be called directly or managed via a test runner
 
 // Auto-run basic diagnostic when this file loads
 try {

@@ -22,17 +22,15 @@ var BaseService = class BaseService {
    * Creates a new BaseService instance with dependency injection
    * @param {Object} dependencies - Injected dependencies
    */
-  constructor(dependencies = {}) {
-    // Dependency injection with fallbacks to global services
-    this.config = dependencies.config || (typeof Config !== 'undefined' ? Config : {});
-    
-    // Enhanced logger initialization with proper console fallback
-    this.logger = dependencies.logger || this.createDefaultLogger();
-    
-    this.errorHandler = dependencies.errorHandler || null;
-    this.validator = dependencies.validator || null;
-    this.cache = dependencies.cache || null;
-    this.monitor = dependencies.monitor || null;
+  constructor() {
+    // Strict dependency injection using GlobalServiceLocator
+    this.config = GlobalServiceLocator.get('Config');
+    if (!this.config) throw new Error('Config service is required');
+    this.logger = GlobalServiceLocator.get('Logger') || console;
+    this.errorHandler = GlobalServiceLocator.get('ErrorHandler');
+    this.validator = GlobalServiceLocator.get('Validator');
+    this.cache = GlobalServiceLocator.get('Cache');
+    this.monitor = GlobalServiceLocator.get('Monitor');
     
     // Service metadata
     this.serviceName = this.constructor.name;
@@ -48,19 +46,7 @@ var BaseService = class BaseService {
     this.initialize();
   }
   
-  /**
-   * Create a default logger with proper interface
-   * @returns {Object} Logger with standard interface
-   */
-  createDefaultLogger() {
-    return {
-      debug: (message, data) => console.log(`[DEBUG] ${this.constructor.name}: ${message}`, data || {}),
-      info: (message, data) => console.log(`[INFO] ${this.constructor.name}: ${message}`, data || {}),
-      warn: (message, data) => console.warn(`[WARN] ${this.constructor.name}: ${message}`, data || {}),
-      error: (message, data) => console.error(`[ERROR] ${this.constructor.name}: ${message}`, data || {}),
-      log: (message, data) => console.log(`[LOG] ${this.constructor.name}: ${message}`, data || {})
-    };
-  }
+  
 
   /**
    * Initialize service - override in derived classes
@@ -288,9 +274,7 @@ var BaseService = class BaseService {
  * Ensure BaseService is globally accessible
  * This is critical for inheritance in other files
  */
-if (typeof globalThis !== 'undefined') {
-  globalThis.BaseService = BaseService;
-}
+
 
 console.log('✅ Foundation loaded successfully - BaseService is now globally available');
 

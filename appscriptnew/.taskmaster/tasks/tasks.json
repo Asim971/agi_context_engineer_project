@@ -1,0 +1,176 @@
+[
+  {
+    "id": "1",
+    "title": "Refactor Global Variable Assignments for Accessibility in GAS",
+    "description": "Refactor global assignments in BaseService.js and related files to use GAS libraries and proper DI, avoiding load order issues.",
+    "priority": "High",
+    "assigned": "Senior Developer",
+    "rules": [
+      "Ensure all refactorings maintain current functionality; no breaking changes without tests.",
+      "Use GAS manifests for library configurations; document all changes in a changelog.",
+      "Test with comprehensive scripts like COMPREHENSIVE_RESOLUTION_VERIFICATION.js.",
+      "Limit scope to affected files only; avoid unnecessary modifications."
+    ],
+    "subtasks": [
+      "Review and configure GAS libraries in manifest.",
+      "Implement DI container in bootstrap function.",
+      "Remove globalThis assignments and test for ReferenceErrors."
+    ],
+    "validation": "EM will review the refactored code, run verification tests, and approve before merging.",
+    "status": "done"
+  },
+  {
+    "id": "2",
+    "title": "Centralize Manual Dependency Injection and Remove Fallbacks",
+    "description": "Centralize registrations in GlobalServiceLocator, remove direct globals, and add tests for injection.",
+    "priority": "High",
+    "assigned": "Software Engineer",
+    "rules": [
+      "All dependencies must be registered in a single bootstrap file; no duplicates allowed.",
+      "Implement early error throwing for missing services with descriptive messages.",
+      "Write unit tests covering 100% of injection scenarios.",
+      "Follow DI best practices: prefer constructor injection over fallbacks."
+    ],
+    "subtasks": [
+      "Audit all files for manual injections and fallbacks.",
+      "Update GlobalServiceLocator with centralized registrations.",
+      "Add and run unit tests for validation."
+    ],
+    "validation": "EM will inspect the centralized logic, verify test coverage, and sign off on stability.",
+    "status": "done"
+  },
+  {
+    "id": "3",
+    "title": "Enhance Error Handling and Recovery Mechanisms",
+    "description": "Integrate GAS-specific error codes into AppScriptError, add persistent logging, and include quota health checks.",
+    "priority": "Medium",
+    "assigned": "Reliability Engineer",
+    "rules": [
+      "All new error codes must be documented with examples and recovery strategies.",
+      "Replace console logging with Spreadsheet or external persistent storage.",
+      "Implement backoff strategies with configurable parameters.",
+      "Ensure no performance overhead; test under load conditions."
+    ],
+    "subtasks": [
+      "Add GAS error codes to AppScriptError class.",
+      "Integrate persistent logging mechanism.",
+      "Develop and test health checks for quotas."
+    ],
+    "validation": "EM will evaluate error recovery in simulated failure scenarios and approve the enhancements.",
+    "status": "done"
+  },
+  {
+    "id": "4",
+    "title": "Improve Concurrency and ID Generation",
+    "description": "Enhance IdService.js with increased lock timeouts, retry logic, ID caching, and quota monitoring.",
+    "priority": "Medium",
+    "assigned": "Backend Developer",
+    "rules": [
+      "Lock timeouts must be tested under high-load simulations.",
+      "Retry logic should have a maximum attempt limit to prevent infinite loops.",
+      "Caching must be secure and not expose sensitive data.",
+      "Monitor and log quota usage in all operations."
+    ],
+    "subtasks": [
+      "Adjust lock timeouts and add retry mechanisms.",
+      "Implement ID caching with invalidation logic.",
+      "Add quota monitoring and alerts."
+    ],
+    "validation": "EM will review concurrency tests and ensure no race conditions before approval.",
+    "status": "done"
+  },
+  {
+    "id": "5",
+    "title": "Strengthen Configuration and Environment Handling",
+    "description": "Add default fallbacks, validation on init, and use GAS manifests for environment configs in ConfigurationService.js.",
+    "priority": "Low",
+    "assigned": "Junior Developer",
+    "rules": [
+      "All configurations must include defaults and validation checks at startup.",
+      "Document environment switching logic clearly.",
+      "Test config loading in both test and prod environments.",
+      "Avoid hardcoding; use manifests for flexibility."
+    ],
+    "subtasks": [
+      "Implement default fallbacks and init validation.",
+      "Configure GAS manifests for environments.",
+      "Test switching between test/prod setups."
+    ],
+    "validation": "EM will verify configuration robustness through environment tests and approve.",
+    "status": "done"
+  },
+  {
+    "id": "6",
+    "title": "Implement DisputeHandler.js - Critical Gap Resolution",
+    "description": "Create a comprehensive dispute resolution workflow handler that manages dispute submissions, routing to appropriate stakeholders (CRO/BDO), status tracking, and resolution processes. This addresses a critical gap identified in the journey analysis audit where dispute resolution workflows are documented but not implemented.",
+    "priority": "High",
+    "assigned": "Senior Developer",
+    "rules": [
+      "Handler must extend BaseService and follow existing architecture patterns.",
+      "Integrate with existing CRM and notification systems (WhatsApp, email).",
+      "Implement proper error handling using AppScriptError framework.",
+      "Include comprehensive logging for audit trail and debugging.",
+      "Follow service locator pattern for dependency injection."
+    ],
+    "subtasks": [
+      "Design dispute workflow state machine (submitted, assigned, in-review, resolved, closed).",
+      "Implement dispute submission handling with validation.",
+      "Create stakeholder routing logic (CRO/BDO assignment based on dispute type).",
+      "Add status tracking and update mechanisms.",
+      "Integrate notification system for status changes.",
+      "Implement resolution documentation and closure processes."
+    ],
+    "validation": "EM will review implementation against documented dispute journey flows and test end-to-end workflow scenarios.",
+    "status": "pending"
+  },
+  {
+    "id": "7",
+    "title": "Implement OrderHandler.js - User Order Processing System",
+    "description": "Develop a complete user order processing system that handles order submissions, validation, approval workflows, and status tracking. Must include specific user order fields: Project ID (Potential Site ID from potential site process), Total Sales Volume, UOM (Unit of Measure - Bags/MT for ACL/AIL business unit filtering), Delivery Note (DN) Slip, Detailed Project Address, Dealer Memo, Site Visit Image, Email Address, and Engineer Eligibility. This addresses a critical gap where user order journeys are documented but no corresponding handler exists.",
+    "priority": "High",
+    "assigned": "Senior Developer",
+    "rules": [
+      "Must integrate with existing form processing and CRM systems.",
+      "Implement proper order validation and business rule enforcement for all user order fields.",
+      "Follow existing service architecture patterns and error handling.",
+      "Include comprehensive audit logging for order lifecycle.",
+      "Support multiple order types and approval workflows.",
+      "Validate all required user order fields: Project ID (Potential Site ID), Total Sales Volume, UOM (Bags/MT), Address, Dealer Memo, Site Visit Image, Email, Engineer Eligibility."
+    ],
+    "subtasks": [
+      "Design order data model including all required user order fields (Project ID as Potential Site ID, Total Sales Volume, UOM, DN Slip, Address, Dealer Memo, Site Visit Image, Email, Engineer Eligibility)."
+      "Implement comprehensive validation for user order fields.",
+      "Implement order submission and initial processing.",
+      "Create approval workflow routing (SR, CRO, BDO based on order type and engineer eligibility).",
+      "Add order status tracking and update mechanisms.",
+      "Integrate with inventory and pricing systems.",
+      "Implement order fulfillment and completion processes."
+    ],
+    "validation": "EM will verify order processing against documented user journey flows, test all user order field validations, and verify various order scenarios.",
+    "status": "pending"
+  },
+  {
+    "id": "8",
+    "title": "Implement WorkflowEngine - Automated Approval Workflows",
+    "description": "Create a centralized workflow engine that automates approval processes across the system, providing intelligent routing, status tracking, and notification management. This addresses the medium priority gap for workflow automation identified in the audit.",
+    "priority": "Medium",
+    "assigned": "Backend Developer",
+    "rules": [
+      "Design flexible workflow definition system supporting multiple process types.",
+      "Implement configurable approval rules and routing logic.",
+      "Integrate with existing notification systems (WhatsApp, email).",
+      "Provide comprehensive workflow monitoring and reporting.",
+      "Ensure scalability and performance for high-volume processing."
+    ],
+    "subtasks": [
+      "Design workflow definition schema and configuration system.",
+      "Implement workflow execution engine with state management.",
+      "Create approval routing logic with role-based assignments.",
+      "Add workflow monitoring and progress tracking.",
+      "Integrate notification system for workflow events.",
+      "Implement workflow reporting and analytics."
+    ],
+    "validation": "EM will test workflow engine with various approval scenarios and verify integration with existing handlers.",
+    "status": "pending"
+  }
+]

@@ -30,10 +30,7 @@ class ServiceHealthMonitor extends BaseService {
     this.healthChecks.set('DatabaseService', () => this.checkDatabaseService());
     this.healthChecks.set('Logger', () => this.checkLogger());
     
-    // Global function checks
-    this.healthChecks.set('getGlobalDB', () => this.checkGlobalDB());
-    this.healthChecks.set('getGlobalLogger', () => this.checkGlobalLogger());
-    this.healthChecks.set('getGlobalConfig', () => this.checkGlobalConfig());
+    
     
     // Handler service checks
     this.healthChecks.set('Handlers', () => this.checkHandlers());
@@ -241,46 +238,7 @@ class ServiceHealthMonitor extends BaseService {
     return status;
   }
   
-  /**
-   * Check global database function
-   * @returns {Object} Service status
-   */
-  checkGlobalDB() {
-    const status = {
-      status: 'HEALTHY',
-      message: 'getGlobalDB function operational',
-      timestamp: new Date().toISOString(),
-      details: {}
-    };
-    
-    if (typeof getGlobalDB !== 'function') {
-      status.status = 'CRITICAL';
-      status.message = 'getGlobalDB function not available';
-      status.recommendations = [
-        'Verify DatabaseService.js contains getGlobalDB function',
-        'Check global function registration'
-      ];
-      return status;
-    }
-    
-    try {
-      const globalDB = getGlobalDB();
-      status.details.returned = typeof globalDB;
-      status.details.isInstance = globalDB instanceof DatabaseService;
-      
-      if (!status.details.isInstance) {
-        status.status = 'ERROR';
-        status.message = 'getGlobalDB returns invalid instance';
-      }
-      
-    } catch (error) {
-      status.status = 'ERROR';
-      status.message = `getGlobalDB execution failed: ${error.message}`;
-      status.details.error = error.message;
-    }
-    
-    return status;
-  }
+  
   
   /**
    * Check Logger service
@@ -296,7 +254,9 @@ class ServiceHealthMonitor extends BaseService {
     
     if (typeof Logger === 'undefined') {
       status.status = 'WARNING';
-      status.message = 'Logger service not available - using console fallback';
+      status.message = 'Logger service not available via GlobalServiceLocator';
+        status.available = false;
+        status.critical = true;
       return status;
     }
     
@@ -318,29 +278,9 @@ class ServiceHealthMonitor extends BaseService {
     return status;
   }
   
-  /**
-   * Check global logger function
-   * @returns {Object} Service status
-   */
-  checkGlobalLogger() {
-    return {
-      status: typeof getGlobalLogger === 'function' ? 'HEALTHY' : 'WARNING',
-      message: typeof getGlobalLogger === 'function' ? 'Global logger available' : 'Global logger function not found',
-      timestamp: new Date().toISOString()
-    };
-  }
   
-  /**
-   * Check global config function
-   * @returns {Object} Service status
-   */
-  checkGlobalConfig() {
-    return {
-      status: typeof getGlobalConfig === 'function' ? 'HEALTHY' : 'WARNING',
-      message: typeof getGlobalConfig === 'function' ? 'Global config available' : 'Global config function not found',
-      timestamp: new Date().toISOString()
-    };
-  }
+  
+  
   
   /**
    * Check handler services
@@ -429,8 +369,3 @@ function quickHealthCheck() {
 }
 
 // Register global functions
-if (typeof globalThis !== 'undefined') {
-  globalThis.healthCheck = healthCheck;
-  globalThis.quickHealthCheck = quickHealthCheck;
-  globalThis.ServiceHealthMonitor = ServiceHealthMonitor;
-}

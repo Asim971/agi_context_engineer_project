@@ -485,6 +485,6 @@ function quickIntegrationStatus() {
 
 // Export functions for global access
 if (typeof global !== 'undefined') {
-  global.testEnhancedServiceIntegration = testEnhancedServiceIntegration;
-  global.quickIntegrationStatus = quickIntegrationStatus;
+  // Export for module usage - no global assignments
+// Use GlobalServiceLocator for service access
 }

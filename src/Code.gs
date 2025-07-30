@@ -234,23 +234,8 @@ function setup() {
       stack: error.stack || 'No stack trace available'
     });
     
-    // Emergency recovery attempt if available
-    if (typeof ServiceRecoverySystem !== 'undefined') {
-      try {
-        const emergencyRecovery = ServiceRecoverySystem.emergencyRecovery();
-        if (emergencyRecovery && emergencyRecovery.success) {
-          logger.info('Emergency recovery succeeded after setup failure');
-          return {
-            success: false,
-            message: 'Setup failed but emergency recovery succeeded',
-            error: error.message,
-            recovery: 'completed'
-          };
-        }
-      } catch (recoveryError) {
-        logger.error('Emergency recovery also failed', { error: recoveryError.message });
-      }
-    }
+    // Strict dependency injection - no emergency recovery
+    // All services must be properly initialized via GlobalServiceLocator
     
     // Re-throw to ensure caller knows setup failed
     throw new AppScriptError(
@@ -891,7 +876,8 @@ function getSystemInfo() {
   };
 }
 
-// Export global functions for Apps Script
+// Global function exports for Google Apps Script - required for GAS runtime
+// These are entry points and cannot be removed in GAS environment
 if (typeof global !== 'undefined') {
   global.setup = setup;
   global.doGet = doGet;

@@ -106,19 +106,5 @@ class LocationService extends BaseService {
   }
 }
 
-// --- Global Instance & Legacy Wrapper ---
-const locationServiceInstance = new LocationService();
-
-const LocationServiceGlobal = {
-  getDistricts: () => locationServiceInstance.getDistricts(),
-  getUpazilas: () => locationServiceInstance.getUpazilas(),
-  getBazaars: () => locationServiceInstance.getBazaars(),
-  getTerritories: () => locationServiceInstance.getTerritories(),
-  getAreas: () => locationServiceInstance.getAreas(),
-  getZones: () => locationServiceInstance.getZones(),
-  getDivisions: () => locationServiceInstance.getDivisions(),
-  getCountries: () => locationServiceInstance.getCountries(),
-  findDemarcation: (criteria) => locationServiceInstance.findDemarcation(criteria),
-  findAdminSetting: (criteria) => locationServiceInstance.findAdminSetting(criteria)
-  // Add other legacy methods here if they were directly exposed and used elsewhere
-};
+// LocationService is now managed via GlobalServiceLocator for dependency injection
+// Removed global instance and LocationServiceGlobal to prevent load order issues and promote DI

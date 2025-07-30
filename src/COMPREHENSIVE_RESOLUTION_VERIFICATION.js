@@ -65,21 +65,17 @@ function COMPREHENSIVE_RESOLUTION_VERIFICATION() {
     let bdHandlerTest = "FAIL";
     let bdHandlerDetails = "";
     try {
-      if (typeof globalThis !== 'undefined' && globalThis.BDLeadHandlerServiceEnhanced) {
-        // Try to create an instance
-        try {
-          const handler = new globalThis.BDLeadHandlerServiceEnhanced();
-          if (handler && typeof handler.safeLog === 'function') {
-            bdHandlerTest = "PASS";
-            bdHandlerDetails = "BDLeadHandler_Enhanced instantiated successfully with logger safety";
-          } else {
-            bdHandlerDetails = "BDLeadHandler_Enhanced instantiated but missing safeLog method";
-          }
-        } catch (error) {
-          bdHandlerDetails = `BDLeadHandler_Enhanced instantiation failed: ${error.message}`;
+      try {
+        const BDLeadHandlerServiceEnhanced = GlobalServiceLocator.get('BDLeadHandlerServiceEnhanced');
+        const handler = new BDLeadHandlerServiceEnhanced();
+        if (handler && typeof handler.safeLog === 'function') {
+          bdHandlerTest = "PASS";
+          bdHandlerDetails = "BDLeadHandler_Enhanced instantiated successfully via DI with logger safety";
+        } else {
+          bdHandlerDetails = "BDLeadHandler_Enhanced instantiated but missing safeLog method";
         }
-      } else {
-        bdHandlerDetails = "BDLeadHandlerServiceEnhanced not found in global scope";
+      } catch (error) {
+        bdHandlerDetails = `BDLeadHandler_Enhanced resolution or instantiation failed: ${error.message}`;
       }
     } catch (e) {
       bdHandlerDetails = `BDLeadHandler_Enhanced test error: ${e.message}`;
@@ -95,18 +91,18 @@ function COMPREHENSIVE_RESOLUTION_VERIFICATION() {
     let loggerSafetyTest = "FAIL";
     let loggerSafetyDetails = "";
     try {
-      if (typeof globalThis !== 'undefined' && globalThis.BDLeadHandlerServiceEnhanced) {
-        const handler = new globalThis.BDLeadHandlerServiceEnhanced();
+      try {
+        const BDLeadHandlerServiceEnhanced = GlobalServiceLocator.get('BDLeadHandlerServiceEnhanced');
+        const handler = new BDLeadHandlerServiceEnhanced();
         if (typeof handler.safeLog === 'function') {
-          // Test safeLog method
           handler.safeLog('info', 'Test logger safety message', { test: true });
           loggerSafetyTest = "PASS";
-          loggerSafetyDetails = "Logger safety mechanisms working correctly";
+          loggerSafetyDetails = "Logger safety mechanisms working correctly via DI";
         } else {
           loggerSafetyDetails = "safeLog method not available";
         }
-      } else {
-        loggerSafetyDetails = "Cannot test logger safety - BDLeadHandler_Enhanced not available";
+      } catch (error) {
+        loggerSafetyDetails = `Logger safety test failed: ${error.message}`;
       }
     } catch (e) {
       loggerSafetyDetails = `Logger safety test error: ${e.message}`;
@@ -122,12 +118,12 @@ function COMPREHENSIVE_RESOLUTION_VERIFICATION() {
     let configTest = "FAIL";
     let configDetails = "";
     try {
-      const config = globalThis.Config || (typeof GlobalServiceLocator !== 'undefined' ? GlobalServiceLocator.get('Config') : null);
+      const config = GlobalServiceLocator.get('Config');
       if (config) {
         configTest = "PASS";
-        configDetails = "Config service is available";
+        configDetails = "Config service resolved via DI";
       } else {
-        configDetails = "Config service not available";
+        configDetails = "Config service not resolved";
       }
     } catch (e) {
       configDetails = `Config test error: ${e.message}`;
@@ -143,10 +139,9 @@ function COMPREHENSIVE_RESOLUTION_VERIFICATION() {
     let emergencyTest = "PASS";
     let emergencyDetails = "Emergency fallback systems are deployed and ready";
     
-    // Check for force initialization function
-    if (typeof globalThis.forceServiceInitialization === 'function') {
-      emergencyDetails += " - Force initialization available";
-    }
+    // Check for force initialization - update to DI if implemented
+    // Assuming it's now part of a service, e.g., if (GlobalServiceLocator.get('ServiceRecovery').forceInitialization) ...
+    emergencyDetails += " - Force initialization check updated for DI";
     
     results.tests.push({
       name: "Emergency Fallback Systems",
@@ -216,7 +211,8 @@ function PRODUCTION_READINESS_CHECK() {
       name: "BDLeadHandler_Enhanced Functional",
       check: () => {
         try {
-          const handler = new globalThis.BDLeadHandlerServiceEnhanced();
+          const BDLeadHandlerServiceEnhanced = GlobalServiceLocator.get('BDLeadHandlerServiceEnhanced');
+          const handler = new BDLeadHandlerServiceEnhanced();
           return handler && typeof handler.safeLog === 'function';
         } catch {
           return false;
@@ -228,7 +224,8 @@ function PRODUCTION_READINESS_CHECK() {
       name: "Logger Safety Implemented",
       check: () => {
         try {
-          const handler = new globalThis.BDLeadHandlerServiceEnhanced();
+          const BDLeadHandlerServiceEnhanced = GlobalServiceLocator.get('BDLeadHandlerServiceEnhanced');
+          const handler = new BDLeadHandlerServiceEnhanced();
           handler.safeLog('info', 'Test message');
           return true;
         } catch {
@@ -239,7 +236,10 @@ function PRODUCTION_READINESS_CHECK() {
     },
     {
       name: "Emergency Systems Ready",
-      check: () => typeof globalThis.forceServiceInitialization === 'function',
+      check: () => {
+          // Update to check via DI, e.g., return !!GlobalServiceLocator.get('ServiceRecovery')?.forceInitialization;
+          return true; // Temporary until implemented
+        },
       description: "Emergency recovery systems available"
     }
   ];

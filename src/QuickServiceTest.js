@@ -153,7 +153,8 @@ function quickServiceTest() {
 
 // Export for global access
 if (typeof globalThis !== 'undefined') {
-  globalThis.quickServiceTest = quickServiceTest;
+  // Export for module usage - no global assignments
+// Use GlobalServiceLocator for service access
 }
 
 console.log('✅ QuickServiceTest loaded - run quickServiceTest() to verify solution');

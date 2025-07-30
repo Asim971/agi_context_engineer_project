@@ -31,10 +31,9 @@ var BDLeadHandler_ServiceLocator = (function() {
   } catch (error) {
     console.error('Failed to resolve HandlerService via GlobalServiceLocator:', error.message);
     
-    // Emergency fallback - try direct access
-    if (typeof HandlerService !== 'undefined') {
-      console.log('Using direct HandlerService access as fallback');
-      HandlerServiceClass = HandlerService;
+    // Strict dependency injection - no fallbacks
+    if (!handlerService) {
+      throw new Error('HandlerService not available via GlobalServiceLocator');
     } else {
       throw new Error('HandlerService not available through any method. Ensure proper service initialization.');
     }
@@ -287,7 +286,8 @@ if (typeof GlobalServiceLocator !== 'undefined') {
  * Export for global access
  */
 if (typeof globalThis !== 'undefined') {
-  globalThis.BDLeadHandler_ServiceLocator = BDLeadHandler_ServiceLocator;
+  // Export for module usage - no global assignments
+// Use GlobalServiceLocator for service access
 }
 
 console.log('✅ BDLeadHandler_ServiceLocator loaded successfully');
