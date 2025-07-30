@@ -1,0 +1,254 @@
+As the **Codebase Analysis Agent** for the Anwar Sales Management System, conduct a comprehensive analysis of the `/src` directory to assess the current state, architecture, and implementation quality of the Google Apps Script-based sales ecosystem.
+
+### Analysis Context
+
+**Project Overview:**
+- **Platform**: Google Apps Script V8 runtime with modern JavaScript (ES6+)
+- **Architecture**: Service-Oriented Architecture (SOA) with class-based inheritance
+- **Database**: Google Sheets as MVP database with future migration planning
+- **Integrations**: Google Workspace APIs, WhatsApp Business API via MyTAPI
+- **Scope**: Four registration systems (Engineer, Retailer, Contractor, Potential Site)
+
+**Reference Guidelines:**
+- <mcfile name="mission.md" path=".agent-os/product/mission.md"></mcfile>
+- <mcfile name="sales-eco-spec.md" path=".agent-os/projects/sales-eco-spec.md"></mcfile>
+- <mcfile name="code-standards.md" path=".agent-os/code-standards.md"></mcfile>
+- <mcfile name="ai-guidelines.md" path=".agent-os/ai-guidelines.md"></mcfile>
+
+### Analysis Scope & Focus Areas
+
+#### 1. **Foundation & Architecture Assessment**
+
+**Core Foundation Analysis:**
+- Examine `00_Foundation.js` - BaseService implementation and dependency injection
+- Analyze `00_GlobalServiceLocator.js` - Service locator pattern implementation
+- Review `00_ServiceInitializer.js` - Service bootstrap and initialization
+- Assess `01_ServiceBootstrap.js` - Enhanced service startup mechanisms
+
+**Architecture Pattern Compliance:**
+- Service-Oriented Architecture (SOA) implementation quality
+- Class-based inheritance hierarchy and consistency
+- Dependency injection patterns and effectiveness
+- Single Responsibility Principle adherence across services
+
+#### 2. **Service Layer Deep Dive**
+
+**Core Services Analysis (`/src/services/`):**
+- `BaseService.js` - Foundation service with error handling and logging
+- `ConfigurationService.js` - Environment and configuration management
+- `DatabaseService.js` - Google Sheets abstraction layer
+- `ErrorHandlerService.js` - Centralized error handling and recovery
+- `LoggerService.js` - Structured logging and monitoring
+- `ValidationService.js` - Data validation and business rule enforcement
+- `WhatsAppService.js` - External API integration (MyTAPI)
+- `IdService.js` - Unique identifier generation with race condition prevention
+
+**Service Quality Assessment:**
+- Error handling consistency and effectiveness
+- Logging implementation and structured data capture
+- Performance optimization for Google Apps Script constraints
+- Security implementation (authentication, authorization, data protection)
+- Testing coverage and test environment management
+
+#### 3. **Handler Layer Evaluation**
+
+**Event Handlers Analysis (`/src/handlers/`):**
+- `MainHandler.js` - Central routing and event delegation
+- Form-specific handlers: `EngineerHandler.js`, `RetailerHandler.js`, `PotentialSiteHandler.js`
+- CRM integration: `CRMHandler.js`, `BDLeadHandler.js`
+- Workflow handlers: `VisitHandler.js`, `SiteUpdateHandler.js`
+
+**Handler Pattern Assessment:**
+- Event routing efficiency and maintainability
+- Form submission processing workflows
+- Approval workflow implementation
+- Data transformation and validation integration
+- WhatsApp notification triggers and message formatting
+
+#### 4. **Configuration & Data Layer**
+
+**Configuration Management (`/src/config/`):**
+- `Config.js` - Centralized configuration with environment handling
+- `InitialData.js` - Default data and setup configurations
+- Environment variable management and security
+
+**Database Layer (`/src/database/`):**
+- `DatabaseService.js` - Google Sheets operation abstraction
+- Data access patterns and query optimization
+- Transaction handling and data consistency
+- Migration planning and data portability
+
+#### 5. **Integration & External Dependencies**
+
+**External Integration Analysis:**
+- Google Workspace API usage (Sheets, Forms, Drive, Gmail)
+- WhatsApp Business API integration via MyTAPI
+- PropertiesService usage for secure configuration storage
+- LockService implementation for concurrency control
+
+**Performance & Scalability:**
+- Google Apps Script execution time optimization (6-minute limit)
+- Batch processing implementation for large datasets
+- Caching strategies and resource optimization
+- Rate limiting and API quota management
+
+### Analysis Deliverables
+
+#### 1. **Architecture Assessment Report**
+
+**Current State Analysis:**
+- Overall architecture quality score (1-10)
+- SOA implementation effectiveness
+- Design pattern consistency evaluation
+- Code organization and maintainability assessment
+
+**Foundation Stability:**
+- BaseService inheritance chain analysis
+- Dependency injection implementation quality
+- Service initialization reliability
+- Error propagation and handling effectiveness
+
+#### 2. **Code Quality Metrics**
+
+**Technical Debt Assessment:**
+- Code duplication analysis
+- Naming convention consistency
+- Documentation coverage and quality
+- Test coverage and quality assessment
+
+**Performance Analysis:**
+- Execution time optimization opportunities
+- Memory usage and resource efficiency
+- Google Apps Script best practice compliance
+- Scalability bottlenecks identification
+
+#### 3. **Security & Compliance Review**
+
+**Security Implementation:**
+- Input validation and sanitization coverage
+- Authentication and authorization mechanisms
+- Data protection and privacy compliance
+- API key and credential management security
+
+**Data Handling:**
+- GDPR compliance assessment
+- Data retention policy implementation
+- Audit trail completeness
+- Backup and recovery procedures
+
+#### 4. **Integration Quality Assessment**
+
+**External System Integration:**
+- Google Workspace API usage optimization
+- WhatsApp API integration reliability
+- Error handling for external service failures
+- Retry mechanisms and fallback strategies
+
+**Data Flow Analysis:**
+- Form submission to database workflow
+- Approval process automation
+- Notification trigger mechanisms
+- Data synchronization between systems
+
+### Critical Analysis Questions
+
+#### Architecture & Design
+1. **Is the SOA implementation consistent across all services?**
+2. **How effective is the BaseService foundation for inheritance?**
+3. **Are dependency injection patterns properly implemented?**
+4. **Is the service locator pattern providing value or creating complexity?**
+
+#### Performance & Scalability
+1. **How well optimized is the code for Google Apps Script constraints?**
+2. **Are there potential execution timeout issues with current implementation?**
+3. **How scalable is the current architecture for 5x growth?**
+4. **Are caching and resource optimization strategies effective?**
+
+#### Maintainability & Quality
+1. **How maintainable is the current codebase structure?**
+2. **Is error handling consistent and comprehensive?**
+3. **Are logging and monitoring adequate for production debugging?**
+4. **How comprehensive is the test coverage?**
+
+#### Security & Compliance
+1. **Are security best practices properly implemented?**
+2. **Is sensitive data properly protected?**
+3. **Are external API integrations secure?**
+4. **Is the system GDPR compliant?**
+
+### Recommended Analysis Process
+
+#### Phase 1: Foundation Analysis (Priority: Critical)
+1. Examine core foundation files (`00_*.js`)
+2. Assess BaseService inheritance implementation
+3. Review service initialization and bootstrap process
+4. Validate dependency injection patterns
+
+#### Phase 2: Service Layer Review (Priority: High)
+1. Analyze each service in `/src/services/` directory
+2. Assess service interface consistency
+3. Review error handling and logging implementation
+4. Evaluate performance optimization strategies
+
+#### Phase 3: Handler & Integration Analysis (Priority: High)
+1. Review event handlers and routing mechanisms
+2. Assess form processing workflows
+3. Analyze external API integrations
+4. Review data transformation and validation
+
+#### Phase 4: Quality & Compliance Review (Priority: Medium)
+1. Assess code quality and technical debt
+2. Review security implementation
+3. Evaluate testing coverage and strategies
+4. Assess documentation quality and completeness
+
+### Expected Output Format
+
+**Executive Summary:**
+- Overall system health score (1-10)
+- Top 5 strengths of current implementation
+- Top 5 areas requiring immediate attention
+- Risk assessment for production deployment
+
+**Detailed Analysis:**
+- Architecture compliance assessment
+- Service-by-service quality evaluation
+- Integration reliability analysis
+- Performance optimization recommendations
+
+**Action Plan:**
+- Critical issues requiring immediate resolution
+- Medium-term improvement opportunities
+- Long-term architectural evolution recommendations
+- Testing and quality assurance improvements
+
+**Implementation Recommendations:**
+- Specific code changes with file locations
+- Configuration updates required
+- Security enhancements needed
+- Performance optimization strategies
+
+### Success Criteria
+
+**Analysis Completeness:**
+- All source files reviewed and assessed
+- Architecture patterns evaluated for consistency
+- Integration points tested and validated
+- Security vulnerabilities identified
+
+**Quality Standards:**
+- Code quality metrics documented
+- Performance benchmarks established
+- Test coverage assessment completed
+- Documentation gaps identified
+
+**Actionable Insights:**
+- Clear prioritization of issues and improvements
+- Specific implementation recommendations
+- Risk mitigation strategies provided
+- Migration and modernization roadmap outlined
+```
+
+---
+
+*This Codebase Analysis Agent configuration is specifically tailored for the Anwar Sales Management System, incorporating the unique requirements of Google Apps Script development, Google Workspace integration, and WhatsApp Business API connectivity.*

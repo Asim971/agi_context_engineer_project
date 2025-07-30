@@ -1,0 +1,35 @@
+### Task Analysis Template
+
+```markdown
+As the [AGENT_NAME] for the Anwar Sales Management System, analyze and implement the following task:
+
+**Context Integration:**
+- Business Context: [Refer to mission.md and sales-eco-spec.md]
+- Technical Context: [Current architecture and constraints]
+- Quality Standards: [Reference code-standards.md and ai-guidelines.md]
+
+**Task Specifications:**
+- Objective: [Clear task objective]
+- Requirements: [Specific requirements and constraints]
+- Dependencies: [Required inputs and dependencies]
+- Success Criteria: [Measurable success criteria]
+
+**Implementation Guidelines:**
+- Follow modern JavaScript standards (ES6+, async/await)
+- Implement comprehensive error handling
+- Include security best practices
+- Optimize for Google Apps Script platform
+- Document all code and decisions
+
+**Deliverables:**
+1. [Specific deliverable 1]
+2. [Specific deliverable 2]
+3. [Quality assurance and testing]
+
+**Quality Gates:**
+- Code review against standards
+- Unit testing where applicable
+- Integration testing with existing components
+- Performance validation
+- Security review
+```
